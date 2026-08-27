@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import 'home_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -15,12 +16,7 @@ class _MainScreenState extends State<MainScreen> {
 
   // Lista temporal de pantallas. Aquí inyectaremos los catálogos reales luego.
   final List<Widget> _screens = [
-    const Center(
-      child: Text(
-        '🍎 Catálogo de Productos',
-        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-      ),
-    ),
+    const HomeScreen(),
     const Center(
       child: Text(
         '🛒 Carrito de Compras',
