@@ -7,10 +7,29 @@ class RolSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class UsuarioSerializer(serializers.ModelSerializer):
+    # Añadimos el campo password explícitamente para el registro
+    password = serializers.CharField(write_only=True)
+
     class Meta:
         model = Usuario
-        # Excluimos el password y datos sensibles por seguridad en la API
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'telefono_whatsapp', 'es_premium', 'rol', 'foto_perfil', 'historia_vendedor', 'link_redes']
+        fields = ['id', 'username', 'email', 'password', 'first_name', 'last_name', 
+                  'telefono_whatsapp', 'es_premium', 'rol', 
+                  'foto_perfil', 'historia_vendedor', 'link_redes']
+
+    # Sobrescribimos el método create para encriptar la contraseña
+    def create(self, validated_data):
+        usuario = Usuario(
+            username=validated_data['username'],
+            email=validated_data.get('email', ''),
+            first_name=validated_data.get('first_name', ''),
+            last_name=validated_data.get('last_name', ''),
+            telefono_whatsapp=validated_data.get('telefono_whatsapp', ''),
+            rol=validated_data.get('rol')
+        )
+        # set_password es la función nativa de Django que aplica la encriptación
+        usuario.set_password(validated_data['password'])
+        usuario.save()
+        return usuario
 
 class CategoriaSerializer(serializers.ModelSerializer):
     class Meta:

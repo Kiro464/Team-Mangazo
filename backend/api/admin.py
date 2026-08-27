@@ -6,7 +6,7 @@ from .models import (
     DetallePedido, EncuestaResena
 )
 
-# 1. Configuración avanzada para tu Usuario personalizado
+# 1. Configuración avanzada para Usuario
 @admin.register(Usuario)
 class CustomUserAdmin(UserAdmin):
     list_display = ('username', 'email', 'first_name', 'last_name', 'rol', 'es_premium', 'is_staff')
