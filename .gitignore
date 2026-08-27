@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Django
+*.sqlite3
+*.log
+
+# Environment variables
+.env
+.env.*
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# CMake
+CMakeSettings.json
+CMakeFiles/
+CMakeCache.txt
+cmake-build-*/
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+.pub-cache/
+.pub/
