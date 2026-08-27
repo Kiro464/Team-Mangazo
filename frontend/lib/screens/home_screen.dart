@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/producto.dart';
 import '../services/producto_service.dart';
+import 'package:provider/provider.dart';
+import '../providers/cart_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -159,15 +161,42 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   const SizedBox(height: 5),
 
-                  Text(
-                    'C\$ ${producto.precioReferencial}',
-                    style: const TextStyle(
-                      fontSize: 15,
-                      color: Colors.blueGrey,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'C\$ ${producto.precioReferencial}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.blueGrey,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(
+                          Icons.add_shopping_cart,
+                          color: Colors.green,
+                        ),
+                        onPressed: () {
+                          // Guarda el producto en el Provider sin recargar la pantalla
+                          Provider.of<CartProvider>(
+                            context,
+                            listen: false,
+                          ).addItem(producto);
+
+                          // Muestra un mensajito rápido abajo
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                '${producto.nombre} agregado al carrito 🛒',
+                              ),
+                              duration: const Duration(seconds: 1),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 ],
               ),
