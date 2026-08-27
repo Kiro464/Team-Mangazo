@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'providers/auth_provider.dart';
 import 'screens/login_screen.dart';
+import 'screens/main_screen.dart';
 
 void main() {
   runApp(
