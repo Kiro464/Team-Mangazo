@@ -42,26 +42,8 @@ class MangazoApp extends StatelessWidget {
             );
           }
           if (auth.isAuthenticated) {
-            // Si el login fue exitoso (o ya había token), muestra el inicio temporal
-            return Scaffold(
-              appBar: AppBar(title: const Text('Inicio')),
-              body: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      '¡Conectado exitosamente con Django! 🎉',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () => auth.logout(),
-                      child: const Text('Cerrar Sesión'),
-                    ),
-                  ],
-                ),
-              ),
-            );
+            // Si el login fue exitoso (o ya había token), muestra el inicio provisional
+            return const MainScreen();
           }
           // Si no está autenticado, muestra el Login
           return const LoginScreen();
