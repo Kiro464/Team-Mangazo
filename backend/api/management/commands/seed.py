@@ -61,7 +61,7 @@ class Command(BaseCommand):
             )
         self.stdout.write('- Usuarios creados (Contraseña para todos: hackatonpassword).')
 
-        # 5. Crear Productos y asignarlos a temporadas múltiples (4FN)
+        # 5. Crear Productos y asignarlos a temporadas múltiples
         if not Producto.objects.exists():
             p1 = Producto.objects.create(
                 vendedor=vendedor1, categoria=cats_dict['Frutas'], nombre='Sandía Híbrida Premium',
