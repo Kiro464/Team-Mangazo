@@ -31,12 +31,14 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'cloudinary_storage',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'cloudinary',
     'rest_framework',
     'api',
     'rest_framework_simplejwt',
@@ -153,4 +155,21 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
     'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+# Configuración Cloudinary
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'wmlv4mxn',
+    'API_KEY': '815965146946474',
+    'API_SECRET': 'Adl73XKtGHGT5YJD25K2nHi-WZk'
+}
+
+# Se establece a Cloudinary por defecto para los archivos multimedia
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
 }

@@ -16,7 +16,7 @@ class Usuario(AbstractUser):
     es_premium = models.BooleanField(default=False)
     # AbstractUser ya incluye por defecto: id, username, password, email, first_name, last_name, date_joined
 
-    foto_perfil = models.URLField(max_length=500, blank=True, null=True)
+    foto_perfil = models.ImageField(upload_to='perfiles/', blank=True, null=True)
     historia_vendedor = models.TextField(blank=True, null=True)
     link_redes = models.URLField(max_length=500, blank=True, null=True)
 
@@ -45,7 +45,7 @@ class Producto(models.Model):
     nombre = models.CharField(max_length=150)
     descripcion = models.TextField()
     precio_referencial = models.DecimalField(max_digits=10, decimal_places=2)
-    imagen_url = models.URLField(max_length=500, blank=True, null=True)
+    imagen = models.ImageField(upload_to='productos/', blank=True, null=True)
     youtube_video_id = models.CharField(max_length=50, blank=True, null=True)
     activo = models.BooleanField(default=True)
 
