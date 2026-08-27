@@ -20,13 +20,15 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
-from api.views import UsuarioViewSet, ProductoViewSet, CategoriaViewSet, TemporadaViewSet
+from api.views import UsuarioViewSet, ProductoViewSet, CategoriaViewSet, TemporadaViewSet, PedidoWhatsAppViewSet, EncuestaResenaViewSet
 
 router = DefaultRouter()
 router.register(r'usuarios', UsuarioViewSet)
 router.register(r'productos', ProductoViewSet)
 router.register(r'categorias', CategoriaViewSet)
 router.register(r'temporadas', TemporadaViewSet)
+router.register(r'pedidos', PedidoWhatsAppViewSet)
+router.register(r'resenas', EncuestaResenaViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),

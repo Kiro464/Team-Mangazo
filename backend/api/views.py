@@ -1,8 +1,9 @@
 from rest_framework import viewsets
-from .models import Usuario, Producto, Categoria, Temporada
+from .models import Usuario, Producto, Categoria, Temporada, PedidoWhatsApp, EncuestaResena
 from .serializers import (
     UsuarioSerializer, ProductoSerializer, 
-    CategoriaSerializer, TemporadaSerializer
+    CategoriaSerializer, TemporadaSerializer,
+    PedidoWhatsAppSerializer, EncuestaResenaSerializer
 )
 
 class UsuarioViewSet(viewsets.ModelViewSet):
@@ -20,3 +21,11 @@ class TemporadaViewSet(viewsets.ModelViewSet):
 class ProductoViewSet(viewsets.ModelViewSet):
     queryset = Producto.objects.all()
     serializer_class = ProductoSerializer
+
+class PedidoWhatsAppViewSet(viewsets.ModelViewSet):
+    queryset = PedidoWhatsApp.objects.all()
+    serializer_class = PedidoWhatsAppSerializer
+
+class EncuestaResenaViewSet(viewsets.ModelViewSet):
+    queryset = EncuestaResena.objects.all()
+    serializer_class = EncuestaResenaSerializer

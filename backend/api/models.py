@@ -16,6 +16,10 @@ class Usuario(AbstractUser):
     es_premium = models.BooleanField(default=False)
     # AbstractUser ya incluye por defecto: id, username, password, email, first_name, last_name, date_joined
 
+    foto_perfil = models.URLField(max_length=500, blank=True, null=True)
+    historia_vendedor = models.TextField(blank=True, null=True)
+    link_redes = models.URLField(max_length=500, blank=True, null=True)
+
     def __str__(self):
         return f"{self.username} - {self.rol.nombre if self.rol else 'Sin Rol'}"
 
