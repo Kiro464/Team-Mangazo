@@ -32,6 +32,27 @@ class AuthService {
     }
   }
 
+  Future<bool> register(Map<String, dynamic> userData) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/usuarios/'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(userData),
+      );
+
+      // Django REST Framework devuelve 201 (Created) cuando se crea un registro exitosamente
+      if (response.statusCode == 201) {
+        return true;
+      } else {
+        print("Error del servidor: ${response.body}");
+        return false;
+      }
+    } catch (e) {
+      print("Error de conexión: $e");
+      return false;
+    }
+  }
+
   // Verifica si ya hay un token guardado (para mantener la sesión abierta)
   Future<bool> hasValidToken() async {
     final prefs = await SharedPreferences.getInstance();

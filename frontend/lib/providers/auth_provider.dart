@@ -29,6 +29,10 @@ class AuthProvider with ChangeNotifier {
     return success;
   }
 
+  Future<bool> register(Map<String, dynamic> userData) async {
+    return await _authService.register(userData);
+  }
+
   Future<void> logout() async {
     await _authService.logout();
     _isAuthenticated = false;
