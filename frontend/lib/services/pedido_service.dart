@@ -114,12 +114,12 @@ class PedidoService {
   }
 
   // Confirmar recepción del pedido
+  // 2. Confirmar recepción del pedido
   Future<bool> confirmarEntrega(int pedidoId) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('access_token');
 
-      // Usamos PATCH para actualizar solo el campo 'estado'
       final response = await http.patch(
         Uri.parse('$baseUrl/pedidos/$pedidoId/'),
         headers: {
@@ -129,7 +129,16 @@ class PedidoService {
         body: jsonEncode({'estado': 'Completado'}),
       );
 
-      return response.statusCode == 200;
+      // Si es exitoso, DRF devuelve 200 OK
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        // Imprimimos la respuesta exacta de Django para saber si falta algún campo
+        print(
+          "Backend rechazó confirmarEntrega: ${response.statusCode} - ${response.body}",
+        );
+        return false;
+      }
     } catch (e) {
       print("Error confirmando entrega: $e");
       return false;

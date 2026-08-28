@@ -237,15 +237,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   if (esPendiente)
                                     ElevatedButton(
                                       onPressed: () async {
+                                        // 1. Hacemos la petición a Django
                                         bool exito = await _pedidoService
                                             .confirmarEntrega(pedido.id);
+
                                         if (exito) {
-                                          await _cargarPedidos(); // Recarga la lista para actualizar el estado visualmente
-                                          if (context.mounted)
+                                          // 2. Lanzamos la encuesta INMEDIATAMENTE antes de recargar la pantalla
+                                          if (context.mounted) {
                                             _mostrarEncuesta(
                                               context,
                                               pedido.id,
                                             );
+                                          }
+                                          // 3. Recargamos los pedidos en el fondo para que el texto cambie a verde
+                                          _cargarPedidos();
+                                        } else {
+                                          // 4. Si Django rechaza la petición, mostramos el error
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  'Error al confirmar. Revisa la consola.',
+                                                ),
+                                                backgroundColor: Colors.red,
+                                              ),
+                                            );
+                                          }
                                         }
                                       },
                                       style: ElevatedButton.styleFrom(
