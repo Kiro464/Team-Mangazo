@@ -1,6 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../models/vendedor.dart';
 
 class AuthService {
   // Cambia esta URL si pruebas en un dispositivo físico (usa la IP de la PC)
@@ -64,5 +65,29 @@ class AuthService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('access_token');
     await prefs.remove('refresh_token');
+  }
+
+  // Función para obtener Mi Perfil
+  Future<Vendedor?> getCurrentUser() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('access_token');
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/usuarios/me/'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(utf8.decode(response.bodyBytes));
+        return Vendedor.fromJson(data);
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
   }
 }

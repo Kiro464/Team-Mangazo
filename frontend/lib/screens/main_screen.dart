@@ -62,10 +62,7 @@ class _MainScreenState extends State<MainScreen> {
             icon: Icon(Icons.calendar_month),
             label: 'Temporada',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.people),
-            label: 'Productores',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Vendedor'),
           BottomNavigationBarItem(
             icon: Icon(Icons.shopping_cart),
             label: 'Carrito',

@@ -8,7 +8,7 @@ class PedidoService {
   final String baseUrl = 'http://10.0.2.2:8000/api';
 
   // Ahora devuelve un int (El ID del pedido) o null si falla
-  Future<int?> enviarPedido(List<CartItem> items) async {
+  Future<int?> enviarPedido(List<CartItem> items, int vendedorId) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('access_token');
@@ -24,8 +24,7 @@ class PedidoService {
           .toList();
 
       final payload = {
-        'comprador': 3,
-        'vendedor': 1,
+        'vendedor': vendedorId,
         'estado': 'Pendiente',
         'detalles_creacion': detalles,
       };

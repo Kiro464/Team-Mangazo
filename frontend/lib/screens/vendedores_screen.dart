@@ -103,9 +103,7 @@ class _VendedoresScreenState extends State<VendedoresScreen> {
                                     ],
                                   ),
                                   subtitle: Text(
-                                    v.historiaVendedor != null
-                                        ? v.historiaVendedor!
-                                        : 'Productor local',
+                                    '⭐ ${v.promedioCalificaciones} • ${v.historiaVendedor ?? "Productor local"}',
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),

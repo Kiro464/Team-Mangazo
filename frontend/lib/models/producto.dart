@@ -5,6 +5,8 @@ class Producto {
   final double precioReferencial;
   final String categoriaNombre;
   final String vendedorNombre;
+  final int vendedorId;
+  final String? vendedorTelefono;
   final String? imagen; // Puede ser null si aún no subes foto
 
   Producto({
@@ -14,6 +16,8 @@ class Producto {
     required this.precioReferencial,
     required this.categoriaNombre,
     required this.vendedorNombre,
+    required this.vendedorId,
+    this.vendedorTelefono,
     this.imagen,
   });
 
@@ -30,6 +34,8 @@ class Producto {
       categoriaNombre: json['categoria_nombre']?.toString() ?? 'Sin categoría',
       // Le decimos a Dart que lea el nuevo campo que configuramos en Django
       vendedorNombre: json['vendedor_nombre']?.toString() ?? 'Vendedor Anónimo',
+      vendedorId: int.tryParse(json['vendedor_id'].toString()) ?? 0,
+      vendedorTelefono: json['vendedor_telefono']?.toString(),
       imagen: json['imagen'],
     );
   }

@@ -25,12 +25,14 @@ class Pedido {
   final int id;
   final String estado;
   final String fecha;
+  final String vendedorNombre;
   final List<DetallePedido> detalles;
 
   Pedido({
     required this.id,
     required this.estado,
     required this.fecha,
+    required this.vendedorNombre,
     required this.detalles,
   });
 
@@ -43,7 +45,11 @@ class Pedido {
     return Pedido(
       id: int.tryParse(json['id'].toString()) ?? 0,
       estado: json['estado']?.toString() ?? 'Pendiente',
-      fecha: json['fecha_generacion']?.toString() ?? '',
+      fecha:
+          json['fecha_generacion']?.toString().substring(0, 10) ??
+          'Sin fecha', // Extraemos solo YYYY-MM-DD
+      vendedorNombre:
+          json['vendedor_nombre']?.toString() ?? 'Vendedor Desconocido',
       detalles: detallesList,
     );
   }

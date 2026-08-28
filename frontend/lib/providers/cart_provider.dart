@@ -51,4 +51,12 @@ class CartProvider with ChangeNotifier {
     _items.clear();
     notifyListeners();
   }
+
+  // Eliminar todos los productos de un vendedor específico tras la compra
+  void removeItemsByVendedor(int vendedorId) {
+    _items.removeWhere(
+      (key, cartItem) => cartItem.producto.vendedorId == vendedorId,
+    );
+    notifyListeners();
+  }
 }

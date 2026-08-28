@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../models/pedido.dart';
 import '../services/pedido_service.dart';
+import '../services/auth_service.dart';
+import '../models/vendedor.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -14,6 +16,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final PedidoService _pedidoService = PedidoService();
   List<Pedido> _pedidos = [];
+  Vendedor? _miPerfil;
   bool _isLoading = true;
 
   @override
@@ -24,6 +27,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _cargarPedidos() async {
     setState(() => _isLoading = true);
+    // Cargamos tanto los pedidos como tus datos al mismo tiempo
+    _miPerfil = await AuthService().getCurrentUser();
     _pedidos = await _pedidoService.getMisPedidos();
     setState(() => _isLoading = false);
   }
@@ -139,12 +144,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          const Text(
-                            'Mi Perfil',
-                            style: TextStyle(
+                          // Mostramos el nombre dinámicamente
+                          Text(
+                            _miPerfil?.nombreCompleto ?? 'Mi Perfil',
+                            style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                             ),
+                          ),
+                          Text(
+                            '@${_miPerfil?.username ?? "usuario"}',
+                            style: const TextStyle(color: Colors.grey),
                           ),
                           const SizedBox(height: 16),
                           OutlinedButton.icon(
@@ -195,16 +205,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 : Icons.check_circle,
                             color: esPendiente ? Colors.orange : Colors.green,
                           ),
-                          title: Text('Pedido #${pedido.id}'),
-                          subtitle: Text(
-                            esPendiente
-                                ? 'Estado: Esperando entrega'
-                                : 'Estado: Completado',
-                            style: TextStyle(
-                              color: esPendiente
-                                  ? Colors.orange[800]
-                                  : Colors.green,
-                            ),
+                          title: Text('Pedido #${pedido.id} - ${pedido.fecha}'),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Vendedor: ${pedido.vendedorNombre}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                esPendiente
+                                    ? 'Estado: Esperando entrega'
+                                    : 'Estado: Completado',
+                                style: TextStyle(
+                                  color: esPendiente
+                                      ? Colors.orange[800]
+                                      : Colors.green,
+                                ),
+                              ),
+                            ],
                           ),
                           children: [
                             const Divider(),
