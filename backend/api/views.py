@@ -1,4 +1,5 @@
 from rest_framework import viewsets
+from django.db.models import Q
 from .models import Usuario, Producto, Categoria, Temporada, PedidoWhatsApp, EncuestaResena
 from .serializers import (
     UsuarioSerializer, ProductoSerializer, 
@@ -62,6 +63,16 @@ class ProductoViewSet(viewsets.ModelViewSet):
 class PedidoWhatsAppViewSet(viewsets.ModelViewSet):
     queryset = PedidoWhatsApp.objects.all()
     serializer_class = PedidoWhatsAppSerializer
+
+    def get_queryset(self):
+        # Si el usuario no está logueado, no devuelve nada
+        if self.request.user.is_anonymous:
+            return PedidoWhatsApp.objects.none()
+
+        # Devuelve SOLO los pedidos donde el usuario es el comprador o el vendedor
+        return PedidoWhatsApp.objects.filter(
+            Q(comprador=self.request.user) | Q(vendedor=self.request.user)
+        ).distinct()
 
 class EncuestaResenaViewSet(viewsets.ModelViewSet):
     queryset = EncuestaResena.objects.all()

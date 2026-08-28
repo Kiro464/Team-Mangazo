@@ -17,14 +17,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<Producto> _productos = [];
   List<Producto> _productosFiltrados = [];
+
   List<Producto> _ofertasFlash = [];
+  List<Producto> _ofertasFlashFiltradas = []; // <-- NUEVA LISTA
+
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _cargarDatos();
-    // Escucha cada vez que el usuario teclea algo
     _searchController.addListener(_filtrarProductos);
   }
 
@@ -37,8 +39,15 @@ class _HomeScreenState extends State<HomeScreen> {
   void _filtrarProductos() {
     final query = _searchController.text.toLowerCase();
     setState(() {
+      // Filtramos el catálogo general
       _productosFiltrados = _productos.where((p) {
-        // Busca coincidencias en nombre, categoría o nombre del vendedor
+        return p.nombre.toLowerCase().contains(query) ||
+            p.categoriaNombre.toLowerCase().contains(query) ||
+            p.vendedorNombre.toLowerCase().contains(query);
+      }).toList();
+
+      // Filtramos también las ofertas flash
+      _ofertasFlashFiltradas = _ofertasFlash.where((p) {
         return p.nombre.toLowerCase().contains(query) ||
             p.categoriaNombre.toLowerCase().contains(query) ||
             p.vendedorNombre.toLowerCase().contains(query);
@@ -47,7 +56,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _cargarDatos() async {
-    // Ejecutamos ambas peticiones al mismo tiempo para que cargue más rápido
     final resultados = await Future.wait([
       _productoService.getProductos(),
       _productoService.getOfertasFlash(),
@@ -56,7 +64,10 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _productos = resultados[0];
       _productosFiltrados = resultados[0];
+
       _ofertasFlash = resultados[1];
+      _ofertasFlashFiltradas = resultados[1]; // <-- INICIALIZAMOS
+
       _isLoading = false;
     });
   }
@@ -94,26 +105,38 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
+
             // --- SECCIÓN: OFERTAS FLASH ---
             const Padding(
               padding: EdgeInsets.all(16.0),
               child: Text(
-                '⚡ Ofertas Flash (Premium)',
+                '⚡ Ofertas Flash', // <-- QUITAMOS "(Premium)"
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
-            SizedBox(
-              height: 262,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: _ofertasFlash.length,
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                itemBuilder: (context, index) {
-                  final producto = _ofertasFlash[index];
-                  return _buildProductoCard(producto, isFlash: true);
-                },
+            if (_ofertasFlashFiltradas.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(
+                  'No hay ofertas flash que coincidan.',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              )
+            else
+              SizedBox(
+                height: 262,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _ofertasFlashFiltradas
+                      .length, // <-- USAMOS LA LISTA FILTRADA
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  itemBuilder: (context, index) {
+                    final producto =
+                        _ofertasFlashFiltradas[index]; // <-- USAMOS LA LISTA FILTRADA
+                    return _buildProductoCard(producto, isFlash: true);
+                  },
+                ),
               ),
-            ),
 
             // --- SECCIÓN: CATÁLOGO GENERAL ---
             const Padding(

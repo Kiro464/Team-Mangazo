@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/vendedor.dart';
+import '../models/producto.dart';
 import '../services/vendedor_service.dart';
+import '../services/producto_service.dart'; // <-- IMPORTAMOS ESTO
 import 'vendedor_detail_screen.dart';
 
 class VendedoresScreen extends StatefulWidget {
@@ -12,20 +14,67 @@ class VendedoresScreen extends StatefulWidget {
 
 class _VendedoresScreenState extends State<VendedoresScreen> {
   final VendedorService _vendedorService = VendedorService();
+  final ProductoService _productoService = ProductoService();
+  final TextEditingController _searchController = TextEditingController();
+
   List<Vendedor> _vendedores = [];
+  List<Vendedor> _vendedoresFiltrados = [];
+  List<Producto> _todosLosProductos = []; // Para buscar por productos
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _cargarVendedores();
+    _cargarDatos();
+    _searchController.addListener(_filtrarVendedores);
   }
 
-  Future<void> _cargarVendedores() async {
-    final resultados = await _vendedorService.getVendedores();
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _cargarDatos() async {
+    final resultados = await Future.wait([
+      _vendedorService.getVendedores(),
+      _productoService.getProductos(),
+    ]);
+
+    List<Vendedor> vendedoresDescargados = resultados[0] as List<Vendedor>;
+
+    // ORDENAMOS DE MAYOR A MENOR CALIFICACIÓN
+    vendedoresDescargados.sort(
+      (a, b) => b.promedioCalificaciones.compareTo(a.promedioCalificaciones),
+    );
+
     setState(() {
-      _vendedores = resultados;
+      _vendedores = vendedoresDescargados;
+      _vendedoresFiltrados = vendedoresDescargados;
+      _todosLosProductos = resultados[1] as List<Producto>;
       _isLoading = false;
+    });
+  }
+
+  void _filtrarVendedores() {
+    final query = _searchController.text.toLowerCase();
+
+    setState(() {
+      _vendedoresFiltrados = _vendedores.where((vendedor) {
+        // 1. ¿Coincide el nombre del vendedor?
+        bool coincideNombre = vendedor.nombreCompleto.toLowerCase().contains(
+          query,
+        );
+
+        // 2. ¿Tiene algún producto o categoría que coincida?
+        bool coincideProducto = _todosLosProductos.any((producto) {
+          return producto.vendedorId == vendedor.id &&
+              (producto.nombre.toLowerCase().contains(query) ||
+                  producto.categoriaNombre.toLowerCase().contains(query));
+        });
+
+        return coincideNombre || coincideProducto;
+      }).toList();
     });
   }
 
@@ -35,18 +84,23 @@ class _VendedoresScreenState extends State<VendedoresScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
-              onRefresh: _cargarVendedores,
+              onRefresh: _cargarDatos,
               child: Column(
                 children: [
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.fromLTRB(
+                      20,
+                      40,
+                      20,
+                      20,
+                    ), // Un poco más de padding arriba
                     color: Colors.green.shade100,
-                    child: const Column(
+                    child: Column(
                       children: [
-                        Icon(Icons.store, size: 40, color: Colors.green),
-                        SizedBox(height: 8),
-                        Text(
+                        const Icon(Icons.store, size: 40, color: Colors.green),
+                        const SizedBox(height: 8),
+                        const Text(
                           'Nuestros Productores',
                           style: TextStyle(
                             fontSize: 22,
@@ -54,22 +108,44 @@ class _VendedoresScreenState extends State<VendedoresScreen> {
                             color: Colors.green,
                           ),
                         ),
-                        Text(
-                          'Conoce a las manos que cultivan tus alimentos',
-                          style: TextStyle(color: Colors.green),
+                        const SizedBox(height: 16),
+                        // --- BARRA DE BÚSQUEDA DE VENDEDORES ---
+                        TextField(
+                          controller: _searchController,
+                          decoration: InputDecoration(
+                            hintText:
+                                'Buscar por nombre, producto o categoría...',
+                            hintStyle: const TextStyle(fontSize: 14),
+                            prefixIcon: const Icon(
+                              Icons.search,
+                              color: Colors.green,
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 0,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(30),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
                         ),
                       ],
                     ),
                   ),
                   Expanded(
-                    child: _vendedores.isEmpty
+                    child: _vendedoresFiltrados.isEmpty
                         ? const Center(
-                            child: Text('No hay vendedores registrados.'),
+                            child: Text(
+                              'No se encontraron vendedores.',
+                              style: TextStyle(color: Colors.grey),
+                            ),
                           )
                         : ListView.builder(
-                            itemCount: _vendedores.length,
+                            itemCount: _vendedoresFiltrados.length,
                             itemBuilder: (context, index) {
-                              final v = _vendedores[index];
+                              final v = _vendedoresFiltrados[index];
                               return Card(
                                 margin: const EdgeInsets.symmetric(
                                   horizontal: 16,
@@ -102,6 +178,7 @@ class _VendedoresScreenState extends State<VendedoresScreen> {
                                       ],
                                     ],
                                   ),
+                                  // Mostramos la calificación en el subtítulo
                                   subtitle: Text(
                                     '⭐ ${v.promedioCalificaciones} • ${v.historiaVendedor ?? "Productor local"}',
                                     maxLines: 1,
