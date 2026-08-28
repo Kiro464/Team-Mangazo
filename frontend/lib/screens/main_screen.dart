@@ -5,6 +5,7 @@ import 'home_screen.dart';
 import 'cart_screen.dart';
 import 'profile_screen.dart';
 import 'calendario_screen.dart';
+import 'vendedores_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -21,6 +22,7 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _screens = [
     const HomeScreen(),
     const CalendarioScreen(),
+    const VendedoresScreen(),
     const CartScreen(),
     const ProfileScreen(),
   ];
@@ -59,6 +61,10 @@ class _MainScreenState extends State<MainScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_month),
             label: 'Temporada',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.people),
+            label: 'Productores',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.shopping_cart),
