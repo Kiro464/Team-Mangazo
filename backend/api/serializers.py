@@ -67,10 +67,17 @@ class ProductoSerializer(serializers.ModelSerializer):
     # Añadimos el ID y el teléfono del vendedor para el Carrito y el filtrado
     vendedor_id = serializers.ReadOnlyField(source='vendedor.id')
     vendedor_telefono = serializers.ReadOnlyField(source='vendedor.telefono_whatsapp')
+
+    vendedor = serializers.PrimaryKeyRelatedField(read_only=True)
     
     class Meta:
         model = Producto
         fields = '__all__'
+
+    # Asignamos al vendedor automáticamente antes de guardar
+    def create(self, validated_data):
+        validated_data['vendedor'] = self.context['request'].user
+        return super().create(validated_data)
 
 class DetallePedidoSerializer(serializers.ModelSerializer):
     # Campo extra para que Flutter reciba el nombre del producto fácilmente

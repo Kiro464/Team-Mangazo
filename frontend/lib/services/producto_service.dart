@@ -103,7 +103,16 @@ class ProductoService {
       // Enviamos el paquete completo
       var response = await request.send();
 
-      return response.statusCode == 201; // 201 = Creado exitosamente
+      if (response.statusCode == 201) {
+        return true; // 201 = Creado exitosamente
+      } else {
+        // Convertimos el Stream de bytes a Texto para leer el error exacto
+        final respStr = await response.stream.bytesToString();
+        print(
+          "Backend rechazó crearProducto: ${response.statusCode} - $respStr",
+        );
+        return false;
+      }
     } catch (e) {
       print("Error creando producto: $e");
       return false;
