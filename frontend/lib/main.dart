@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
 import 'screens/login_screen.dart';
 import 'screens/main_screen.dart';
+import 'screens/seller_main_screen.dart';
 import 'providers/cart_provider.dart';
 
 void main() {
@@ -46,8 +47,10 @@ class MangazoApp extends StatelessWidget {
             );
           }
           if (auth.isAuthenticated) {
-            // Si el login fue exitoso (o ya había token), muestra el inicio provisional
-            return const MainScreen();
+            if (auth.userRol == 2) {
+              return const SellerMainScreen(); // Ruta Vendedor
+            }
+            return const MainScreen(); // Ruta Comprador
           }
           // Si no está autenticado, muestra el Login
           return const LoginScreen();

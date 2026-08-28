@@ -32,9 +32,10 @@ class Vendedor {
   final String? fotoPerfil;
   final String? historiaVendedor;
   final String? linkRedes;
-  final String? videoYoutube; // <-- NUEVO
-  final double promedioCalificaciones; // <-- NUEVO
-  final List<Resena> resenas; // <-- NUEVO
+  final String? videoYoutube;
+  final double promedioCalificaciones;
+  final List<Resena> resenas;
+  final int rol;
 
   Vendedor({
     required this.id,
@@ -50,6 +51,7 @@ class Vendedor {
     this.videoYoutube,
     required this.promedioCalificaciones,
     required this.resenas,
+    required this.rol,
   });
 
   String get nombreCompleto =>
@@ -72,6 +74,7 @@ class Vendedor {
       promedioCalificaciones:
           double.tryParse(json['promedio_calificaciones'].toString()) ?? 0.0,
       resenas: listaResenas.map((i) => Resena.fromJson(i)).toList(),
+      rol: int.tryParse(json['rol'].toString()) ?? 3,
     );
   }
 }

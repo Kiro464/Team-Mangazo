@@ -5,6 +5,7 @@ import '../models/pedido.dart';
 import '../services/pedido_service.dart';
 import '../services/auth_service.dart';
 import '../models/vendedor.dart';
+import 'settings_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -132,41 +133,64 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       color: Theme.of(
                         context,
                       ).colorScheme.primary.withOpacity(0.1),
-                      child: Column(
+                      child: Stack(
                         children: [
-                          const CircleAvatar(
-                            radius: 40,
-                            backgroundColor: Colors.white,
-                            child: Icon(
-                              Icons.person,
-                              size: 50,
-                              color: Colors.grey,
+                          // Botón de Configuración arriba a la derecha
+                          Align(
+                            alignment: Alignment.topRight,
+                            child: IconButton(
+                              icon: const Icon(
+                                Icons.settings,
+                                color: Colors.blueGrey,
+                              ),
+                              onPressed: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const SettingsScreen(),
+                                ),
+                              ),
                             ),
                           ),
-                          const SizedBox(height: 16),
-                          // Mostramos el nombre dinámicamente
-                          Text(
-                            _miPerfil?.nombreCompleto ?? 'Mi Perfil',
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            '@${_miPerfil?.username ?? "usuario"}',
-                            style: const TextStyle(color: Colors.grey),
-                          ),
-                          const SizedBox(height: 16),
-                          OutlinedButton.icon(
-                            onPressed: () => Provider.of<AuthProvider>(
-                              context,
-                              listen: false,
-                            ).logout(),
-                            icon: const Icon(Icons.logout, color: Colors.red),
-                            label: const Text(
-                              'Cerrar Sesión',
-                              style: TextStyle(color: Colors.red),
-                            ),
+                          // Tu columna original
+                          Column(
+                            children: [
+                              const CircleAvatar(
+                                radius: 40,
+                                backgroundColor: Colors.white,
+                                child: Icon(
+                                  Icons.person,
+                                  size: 50,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                _miPerfil?.nombreCompleto ?? 'Mi Perfil',
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                '@${_miPerfil?.username ?? "usuario"}',
+                                style: const TextStyle(color: Colors.grey),
+                              ),
+                              const SizedBox(height: 16),
+                              OutlinedButton.icon(
+                                onPressed: () => Provider.of<AuthProvider>(
+                                  context,
+                                  listen: false,
+                                ).logout(),
+                                icon: const Icon(
+                                  Icons.logout,
+                                  color: Colors.red,
+                                ),
+                                label: const Text(
+                                  'Cerrar Sesión',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
