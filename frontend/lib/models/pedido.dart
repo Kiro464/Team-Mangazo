@@ -11,9 +11,12 @@ class DetallePedido {
 
   factory DetallePedido.fromJson(Map<String, dynamic> json) {
     return DetallePedido(
-      productoNombre: json['producto_nombre'] ?? 'Producto',
-      cantidad: json['cantidad'],
-      precio: double.parse(json['precio_unitario_aplicado'].toString()),
+      productoNombre:
+          json['producto_nombre']?.toString() ?? 'Producto Desconocido',
+      // Convertimos a String primero, y luego forzamos a int/double. Si falla, ponemos un 0.
+      cantidad: int.tryParse(json['cantidad'].toString()) ?? 1,
+      precio:
+          double.tryParse(json['precio_unitario_aplicado'].toString()) ?? 0.0,
     );
   }
 }
@@ -38,14 +41,13 @@ class Pedido {
         .toList();
 
     return Pedido(
-      id: json['id'],
-      estado: json['estado'] ?? 'Pendiente',
-      fecha: json['fecha_generacion'] ?? '',
+      id: int.tryParse(json['id'].toString()) ?? 0,
+      estado: json['estado']?.toString() ?? 'Pendiente',
+      fecha: json['fecha_generacion']?.toString() ?? '',
       detalles: detallesList,
     );
   }
 
-  // Calcula el total sumando (precio * cantidad) de cada detalle
   double get total =>
       detalles.fold(0, (sum, item) => sum + (item.precio * item.cantidad));
 }

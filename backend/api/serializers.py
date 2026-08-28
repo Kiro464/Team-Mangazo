@@ -44,6 +44,8 @@ class TemporadaSerializer(serializers.ModelSerializer):
 class ProductoSerializer(serializers.ModelSerializer):
     # Campo de solo lectura para facilitar el trabajo en Flutter
     categoria_nombre = serializers.ReadOnlyField(source='categoria.nombre')
+    # Extraemos el nombre completo del vendedor (first_name + last_name)
+    vendedor_nombre = serializers.ReadOnlyField(source='vendedor.get_full_name')
     
     class Meta:
         model = Producto

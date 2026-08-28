@@ -58,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             SizedBox(
-              height: 230,
+              height: 262,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: _ofertasFlash.length,
@@ -106,61 +106,74 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Imagen del producto
-            SizedBox(
-              height: isFlash ? 90 : 120,
+            Container(
+              height: 100,
               width: double.infinity,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(12),
-                  ),
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(12),
                 ),
-                child: producto.imagen != null
-                    ? ClipRRect(
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(12),
-                        ),
-                        child: Image.network(
-                          producto.imagen!,
-                          fit: BoxFit.cover,
-                        ),
-                      )
-                    : const Icon(Icons.image, size: 50, color: Colors.grey),
               ),
+              child: producto.imagen != null
+                  ? ClipRRect(
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(12),
+                      ),
+                      child: Image.network(producto.imagen!, fit: BoxFit.cover),
+                    )
+                  : const Icon(Icons.image, size: 50, color: Colors.grey),
             ),
-
             Padding(
-              padding: const EdgeInsets.all(10.0),
+              padding: const EdgeInsets.all(12.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     producto.categoriaNombre.toUpperCase(),
                     style: const TextStyle(
-                      fontSize: 9,
+                      fontSize: 10,
                       color: Colors.green,
                       fontWeight: FontWeight.bold,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
-
-                  const SizedBox(height: 3),
-
+                  const SizedBox(height: 4),
                   Text(
                     producto.nombre,
                     style: const TextStyle(
-                      fontSize: 15,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-
-                  const SizedBox(height: 5),
-
+                  const SizedBox(height: 4),
+                  // --- NUEVA SECCIÓN DEL VENDEDOR ---
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.storefront,
+                        size: 14,
+                        color: Colors.grey,
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          producto.vendedorNombre.isEmpty
+                              ? 'Vendedor'
+                              : producto.vendedorNombre,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[700],
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  // ------------------------------------
+                  const SizedBox(height: 4),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -178,13 +191,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: Colors.green,
                         ),
                         onPressed: () {
-                          // Guarda el producto en el Provider sin recargar la pantalla
                           Provider.of<CartProvider>(
                             context,
                             listen: false,
                           ).addItem(producto);
-
-                          // Muestra un mensajito rápido abajo
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
