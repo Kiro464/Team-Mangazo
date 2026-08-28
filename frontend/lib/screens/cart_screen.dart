@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/cart_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../services/pedido_service.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
@@ -102,14 +104,60 @@ class CartScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 16),
                       ElevatedButton.icon(
-                        onPressed: () {
-                          // AQUÍ ENVIAREMOS EL PEDIDO A DJANGO Y A WHATSAPP
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Procesando pedido...'),
-                            ),
-                          );
-                        },
+                        // Si el carrito está vacío, deshabilitamos el botón
+                        onPressed: cart.items.isEmpty
+                            ? null
+                            : () async {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Generando pedido... 🚀'),
+                                  ),
+                                );
+
+                                // 1. Convertimos el diccionario del carrito en una lista
+                                final listaItems = cart.items.values.toList();
+
+                                // 2. Enviamos el registro a la base de datos de Django
+                                final pedidoService = PedidoService();
+                                await pedidoService.enviarPedido(listaItems);
+
+                                // 3. Formateamos un mensaje bonito para WhatsApp
+                                String mensaje =
+                                    "🥭 *NUEVO PEDIDO DE MANGAZO* 🥭\n\n";
+                                mensaje +=
+                                    "Hola, quiero realizar la siguiente compra:\n\n";
+                                for (var item in listaItems) {
+                                  mensaje +=
+                                      "🔸 ${item.cantidad}x ${item.producto.nombre} (C\$ ${item.producto.precioReferencial})\n";
+                                }
+                                mensaje +=
+                                    "\n*💰 Total a pagar: C\$ ${cart.totalAmount.toStringAsFixed(2)}*";
+
+                                // 4. Preparamos el enlace de WhatsApp
+                                const String numeroVendedor = "50578383900";
+                                final Uri whatsappUrl = Uri.parse(
+                                  "https://wa.me/$numeroVendedor?text=${Uri.encodeComponent(mensaje)}",
+                                );
+
+                                // 5. Lanzamos WhatsApp y vaciamos el carrito
+                                try {
+                                  await launchUrl(
+                                    whatsappUrl,
+                                    mode: LaunchMode.platformDefault,
+                                  );
+
+                                  cart.clear(); // Vaciamos el carrito tras el éxito
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'No se pudo abrir el enlace: $e',
+                                      ),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              },
                         icon: const Icon(Icons.chat),
                         label: const Text(
                           'Comprar vía WhatsApp',
