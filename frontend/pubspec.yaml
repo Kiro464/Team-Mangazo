@@ -42,6 +42,7 @@ dependencies:
   url_launcher: ^6.2.5            # Para abrir WhatsApp
   youtube_player_flutter: ^10.0.1  # Para reproducir los videos
   google_fonts: ^6.2.1            # Tipografías rápidas
+  image_picker: ^1.1.2     # <-- NUEVO: Para tomar fotos de los productos
 
 dev_dependencies:
   flutter_test:
