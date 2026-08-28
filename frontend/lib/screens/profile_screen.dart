@@ -205,7 +205,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 : Icons.check_circle,
                             color: esPendiente ? Colors.orange : Colors.green,
                           ),
-                          title: Text('Pedido #${pedido.id} - ${pedido.fecha}'),
+                          title: Text(
+                            'Pedido - ${pedido.fecha}',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
