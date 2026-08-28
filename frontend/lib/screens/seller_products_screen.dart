@@ -3,8 +3,7 @@ import '../models/producto.dart';
 import '../models/vendedor.dart';
 import '../services/producto_service.dart';
 import '../services/auth_service.dart';
-
-// import 'add_product_screen.dart'; // Lo usaremos en el siguiente paso
+import 'add_product_screen.dart';
 
 class SellerProductsScreen extends StatefulWidget {
   const SellerProductsScreen({super.key});
@@ -104,16 +103,18 @@ class _SellerProductsScreenState extends State<SellerProductsScreen> {
       // Botón flotante para agregar producto
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          // Navigator.push(context, MaterialPageRoute(builder: (context) => const AddProductScreen())).then((_) => _cargarMisProductos());
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Abriendo cámara... (Siguiente paso)'),
-            ),
-          );
+          // Al regresar de la pantalla, recargamos la lista automáticamente
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AddProductScreen()),
+          ).then((_) => _cargarMisProductos());
         },
         backgroundColor: Colors.amber.shade600,
-        icon: const Icon(Icons.add_a_photo),
-        label: const Text('Nuevo Producto'),
+        icon: const Icon(Icons.add_a_photo, color: Colors.white),
+        label: const Text(
+          'Nuevo Producto',
+          style: TextStyle(color: Colors.white),
+        ),
       ),
     );
   }

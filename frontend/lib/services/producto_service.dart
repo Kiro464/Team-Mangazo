@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/producto.dart';
@@ -73,6 +74,39 @@ class ProductoService {
     } catch (e) {
       print("Error obteniendo calendario: $e");
       return [];
+    }
+  }
+
+  // 4. Crear un nuevo producto (Multipart Request para la imagen)
+  Future<bool> crearProducto(Map<String, String> datos, File? imagen) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('access_token');
+
+      // Creamos la petición "Multipart"
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('$baseUrl/productos/'),
+      );
+      request.headers['Authorization'] = 'Bearer $token';
+
+      // Agregamos los textos (nombre, precio, categoria, etc.)
+      request.fields.addAll(datos);
+
+      // Si el vendedor tomó una foto, la adjuntamos
+      if (imagen != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath('imagen', imagen.path),
+        );
+      }
+
+      // Enviamos el paquete completo
+      var response = await request.send();
+
+      return response.statusCode == 201; // 201 = Creado exitosamente
+    } catch (e) {
+      print("Error creando producto: $e");
+      return false;
     }
   }
 }
