@@ -7,91 +7,7 @@ import '../services/pedido_service.dart';
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
 
-  // --- 1. CUADRO DE DIÁLOGO DE LA ENCUESTA ---
-  void _mostrarEncuesta(BuildContext context, int pedidoId) {
-    int calificacion = 5;
-    TextEditingController comentarioController = TextEditingController();
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: const Text(
-                '¡Gracias por tu compra!',
-                textAlign: TextAlign.center,
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text('¿Cómo calificarías tu experiencia?'),
-                  const SizedBox(height: 16),
-                  // Generador de Estrellas interactivas
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(5, (index) {
-                      return IconButton(
-                        icon: Icon(
-                          index < calificacion ? Icons.star : Icons.star_border,
-                          color: Colors.amber,
-                          size: 36,
-                        ),
-                        onPressed: () =>
-                            setState(() => calificacion = index + 1),
-                      );
-                    }),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: comentarioController,
-                    decoration: const InputDecoration(
-                      hintText: 'Déjanos un comentario (Opcional)',
-                      border: OutlineInputBorder(),
-                    ),
-                    maxLines: 2,
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(dialogContext), // Omitir
-                  child: const Text(
-                    'Omitir',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    await PedidoService().enviarResena(
-                      pedidoId,
-                      calificacion,
-                      comentarioController.text,
-                    );
-                    if (context.mounted) {
-                      Navigator.pop(dialogContext); // Cierra la encuesta
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            '¡Reseña enviada! Gracias por tu feedback.',
-                          ),
-                          backgroundColor: Colors.green,
-                        ),
-                      );
-                    }
-                  },
-                  child: const Text('Enviar Reseña'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
-  // --- 2. CUADRO DE DIÁLOGO DE CONFIRMACIÓN ---
+  // --- CUADRO DE DIÁLOGO DE CONFIRMACIÓN ---
   void _mostrarConfirmacion(
     BuildContext context,
     CartProvider cart,
@@ -99,7 +15,7 @@ class CartScreen extends StatelessWidget {
   ) {
     showDialog(
       context: context,
-      barrierDismissible: false, // Obliga a tocar un botón
+      barrierDismissible: false,
       builder: (dialogContext) {
         bool isProcessing = false;
 
@@ -114,9 +30,7 @@ class CartScreen extends StatelessWidget {
                 TextButton(
                   onPressed: isProcessing
                       ? null
-                      : () => Navigator.pop(
-                          dialogContext,
-                        ), // Solo cierra, no borra el carrito
+                      : () => Navigator.pop(dialogContext),
                   child: const Text(
                     'No, cancelar',
                     style: TextStyle(color: Colors.red),
@@ -126,26 +40,25 @@ class CartScreen extends StatelessWidget {
                   onPressed: isProcessing
                       ? null
                       : () async {
-                          setState(
-                            () => isProcessing = true,
-                          ); // Muestra cargando
+                          setState(() => isProcessing = true);
 
-                          // Solo si dice que sí, guardamos en Django
                           int? pedidoId = await PedidoService().enviarPedido(
                             listaItems,
                           );
 
                           if (pedidoId != null) {
                             cart.clear(); // Vaciamos el carrito
-                            if (context.mounted)
-                              Navigator.pop(
-                                dialogContext,
-                              ); // Cerramos confirmación
-                            if (context.mounted)
-                              _mostrarEncuesta(
-                                context,
-                                pedidoId,
-                              ); // Lanzamos encuesta
+                            if (context.mounted) {
+                              Navigator.pop(dialogContext); // Cerramos diálogo
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    '¡Pedido registrado! Podrás confirmarlo cuando lo recibas.',
+                                  ),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                            }
                           } else {
                             setState(() => isProcessing = false);
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -175,7 +88,7 @@ class CartScreen extends StatelessWidget {
     );
   }
 
-  // --- 3. INTERFAZ PRINCIPAL DEL CARRITO ---
+  // --- INTERFAZ PRINCIPAL DEL CARRITO ---
   @override
   Widget build(BuildContext context) {
     final cart = Provider.of<CartProvider>(context);
@@ -273,8 +186,6 @@ class CartScreen extends StatelessWidget {
                             ? null
                             : () async {
                                 final listaItems = cart.items.values.toList();
-
-                                // 1. Preparamos el enlace de WhatsApp
                                 String mensaje =
                                     "🥭 *NUEVO PEDIDO DE MANGAZO* 🥭\n\nHola, quiero realizar la siguiente compra:\n\n";
                                 for (var item in listaItems) {
@@ -289,13 +200,11 @@ class CartScreen extends StatelessWidget {
                                   "https://wa.me/$numeroVendedor?text=${Uri.encodeComponent(mensaje)}",
                                 );
 
-                                // 2. Lanzamos WhatsApp
                                 try {
                                   await launchUrl(
                                     whatsappUrl,
                                     mode: LaunchMode.platformDefault,
                                   );
-                                  // 3. Cuando el usuario regrese a la app, lanzamos la confirmación
                                   if (context.mounted)
                                     _mostrarConfirmacion(
                                       context,

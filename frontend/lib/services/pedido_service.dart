@@ -63,6 +63,7 @@ class PedidoService {
         'pedido': pedidoId,
         'calificacion': calificacion,
         'comentario': comentario,
+        'medios_compra': 'WhatsApp',
       };
 
       final response = await http.post(
