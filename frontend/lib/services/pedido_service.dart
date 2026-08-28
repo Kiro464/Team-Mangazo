@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/cart_provider.dart';
+import '../models/pedido.dart';
 
 class PedidoService {
   final String baseUrl = 'http://10.0.2.2:8000/api';
@@ -78,6 +79,59 @@ class PedidoService {
       return response.statusCode == 201;
     } catch (e) {
       print("Error enviando reseña: $e");
+      return false;
+    }
+  }
+
+  // Obtener historial de pedidos
+  Future<List<Pedido>> getMisPedidos() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('access_token');
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/pedidos/'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        List jsonResponse = jsonDecode(utf8.decode(response.bodyBytes));
+        // Mapeamos a objetos Pedido y los invertimos para ver los más nuevos arriba
+        return jsonResponse
+            .map((item) => Pedido.fromJson(item))
+            .toList()
+            .reversed
+            .toList();
+      }
+      return [];
+    } catch (e) {
+      print("Error obteniendo pedidos: $e");
+      return [];
+    }
+  }
+
+  // Confirmar recepción del pedido
+  Future<bool> confirmarEntrega(int pedidoId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('access_token');
+
+      // Usamos PATCH para actualizar solo el campo 'estado'
+      final response = await http.patch(
+        Uri.parse('$baseUrl/pedidos/$pedidoId/'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({'estado': 'Completado'}),
+      );
+
+      return response.statusCode == 200;
+    } catch (e) {
+      print("Error confirmando entrega: $e");
       return false;
     }
   }

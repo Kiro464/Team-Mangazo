@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import 'home_screen.dart';
 import 'cart_screen.dart';
+import 'profile_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -15,16 +16,11 @@ class _MainScreenState extends State<MainScreen> {
   // Controla qué pestaña está activa (0 = Inicio, 1 = Carrito, 2 = Perfil)
   int _currentIndex = 0;
 
-  // Lista temporal de pantallas. Aquí inyectaremos los catálogos reales luego.
+  // Lista temporal de pantallas.
   final List<Widget> _screens = [
     const HomeScreen(),
     const CartScreen(),
-    const Center(
-      child: Text(
-        '👤 Perfil y Configuraciones',
-        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-      ),
-    ),
+    const ProfileScreen(),
   ];
 
   @override
@@ -37,16 +33,6 @@ class _MainScreenState extends State<MainScreen> {
         ),
         centerTitle: true,
         backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-        actions: [
-          // Botón para cerrar sesión rápidamente
-          IconButton(
-            icon: const Icon(Icons.logout, color: Colors.redAccent),
-            tooltip: 'Cerrar Sesión',
-            onPressed: () {
-              Provider.of<AuthProvider>(context, listen: false).logout();
-            },
-          ),
-        ],
       ),
       // El cuerpo cambia dinámicamente según el botón presionado
       body: _screens[_currentIndex],
