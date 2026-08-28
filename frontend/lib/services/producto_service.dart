@@ -55,4 +55,24 @@ class ProductoService {
       return [];
     }
   }
+
+  // 3. Obtener productos del Calendario de Temporada (Mes actual)
+  Future<List<Producto>> getCalendarioTemporada() async {
+    try {
+      final headers = await _getHeaders();
+      final response = await http.get(
+        Uri.parse('$baseUrl/productos/calendario-temporada/'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        List jsonResponse = jsonDecode(utf8.decode(response.bodyBytes));
+        return jsonResponse.map((item) => Producto.fromJson(item)).toList();
+      }
+      return [];
+    } catch (e) {
+      print("Error obteniendo calendario: $e");
+      return [];
+    }
+  }
 }

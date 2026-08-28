@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/producto.dart';
 import '../services/producto_service.dart';
-import 'package:provider/provider.dart';
 import '../providers/cart_provider.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -13,7 +13,10 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final ProductoService _productoService = ProductoService();
+  final TextEditingController _searchController = TextEditingController();
+
   List<Producto> _productos = [];
+  List<Producto> _productosFiltrados = [];
   List<Producto> _ofertasFlash = [];
   bool _isLoading = true;
 
@@ -21,6 +24,26 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _cargarDatos();
+    // Escucha cada vez que el usuario teclea algo
+    _searchController.addListener(_filtrarProductos);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _filtrarProductos() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      _productosFiltrados = _productos.where((p) {
+        // Busca coincidencias en nombre, categoría o nombre del vendedor
+        return p.nombre.toLowerCase().contains(query) ||
+            p.categoriaNombre.toLowerCase().contains(query) ||
+            p.vendedorNombre.toLowerCase().contains(query);
+      }).toList();
+    });
   }
 
   Future<void> _cargarDatos() async {
@@ -32,6 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     setState(() {
       _productos = resultados[0];
+      _productosFiltrados = resultados[0];
       _ofertasFlash = resultados[1];
       _isLoading = false;
     });
@@ -49,6 +73,27 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Buscar por producto, categoría o vendedor...',
+                  prefixIcon: const Icon(Icons.search, color: Colors.green),
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  ),
+                ),
+              ),
+            ),
             // --- SECCIÓN: OFERTAS FLASH ---
             const Padding(
               padding: EdgeInsets.all(16.0),
@@ -78,17 +123,30 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
-            ListView.builder(
-              physics:
-                  const NeverScrollableScrollPhysics(), // Desactiva su propio scroll para usar el de la página
-              shrinkWrap: true, // Se adapta al tamaño del contenido
-              itemCount: _productos.length,
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              itemBuilder: (context, index) {
-                final producto = _productos[index];
-                return _buildProductoCard(producto, isFlash: false);
-              },
-            ),
+
+            if (_productosFiltrados.isEmpty)
+              const Padding(
+                padding: EdgeInsets.all(32.0),
+                child: Center(
+                  child: Text(
+                    'No se encontraron productos coincidentes 🔍',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ),
+              )
+            else
+              ListView.builder(
+                physics:
+                    const NeverScrollableScrollPhysics(), // Desactiva su propio scroll para usar el de la página
+                shrinkWrap: true, // Se adapta al tamaño del contenido
+                itemCount: _productosFiltrados.length, // <-- CAMBIO AQUÍ
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                itemBuilder: (context, index) {
+                  final producto =
+                      _productosFiltrados[index]; // <-- CAMBIO AQUÍ
+                  return _buildProductoCard(producto, isFlash: false);
+                },
+              ),
           ],
         ),
       ),
