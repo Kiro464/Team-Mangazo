@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -13,28 +15,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Leemos si es vendedor (rol == 2)
+    final bool isSeller = Provider.of<AuthProvider>(context).userRol == 2;
+    final Color themeColor = isSeller ? Colors.amber : Colors.green;
+    final Color bgColor = isSeller
+        ? Colors.amber.shade100
+        : Theme.of(context).colorScheme.primary.withOpacity(0.1);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Configuración'),
-        backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+        backgroundColor: bgColor,
       ),
       body: ListView(
         children: [
-          const Padding(
-            padding: EdgeInsets.all(16.0),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
             child: Text(
               'Preferencias de la Aplicación',
-              style: TextStyle(
-                color: Colors.green,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(color: themeColor, fontWeight: FontWeight.bold),
             ),
           ),
           SwitchListTile(
             title: const Text('Notificaciones Push'),
             subtitle: const Text('Recibe avisos sobre tus pedidos'),
             value: _notificaciones,
-            activeColor: Colors.green,
+            activeColor: themeColor, // <--- Color dinámico
             onChanged: (val) => setState(() => _notificaciones = val),
           ),
           SwitchListTile(

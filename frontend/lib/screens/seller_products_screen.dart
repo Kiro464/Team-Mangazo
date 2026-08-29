@@ -86,13 +86,13 @@ class _SellerProductsScreenState extends State<SellerProductsScreen> {
                                 color: Colors.blueGrey,
                               ),
                               onPressed: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Edición disponible en fase 2',
-                                    ),
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        AddProductScreen(productoAEditar: p),
                                   ),
-                                );
+                                ).then((_) => _cargarMisProductos());
                               },
                             ),
                           ),

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -88,6 +89,32 @@ class AuthService {
       return null;
     } catch (e) {
       return null;
+    }
+  }
+
+  // Actualizar mi perfil
+  Future<bool> actualizarPerfil(
+    Map<String, String> datos,
+    File? fotoPerfil,
+  ) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('access_token');
+      var request = http.MultipartRequest(
+        'PATCH',
+        Uri.parse('$baseUrl/usuarios/me/'),
+      );
+      request.headers['Authorization'] = 'Bearer $token';
+      request.fields.addAll(datos);
+      if (fotoPerfil != null)
+        request.files.add(
+          await http.MultipartFile.fromPath('foto_perfil', fotoPerfil.path),
+        );
+
+      var response = await request.send();
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
     }
   }
 }

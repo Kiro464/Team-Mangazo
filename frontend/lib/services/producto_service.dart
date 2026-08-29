@@ -118,4 +118,32 @@ class ProductoService {
       return false;
     }
   }
+
+  // 5. Editar producto existente
+  Future<bool> editarProducto(
+    int id,
+    Map<String, String> datos,
+    File? imagen,
+  ) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('access_token');
+      // Usamos PATCH para actualizar
+      var request = http.MultipartRequest(
+        'PATCH',
+        Uri.parse('$baseUrl/productos/$id/'),
+      );
+      request.headers['Authorization'] = 'Bearer $token';
+      request.fields.addAll(datos);
+      if (imagen != null)
+        request.files.add(
+          await http.MultipartFile.fromPath('imagen', imagen.path),
+        );
+
+      var response = await request.send();
+      return response.statusCode == 200 || response.statusCode == 201;
+    } catch (e) {
+      return false;
+    }
+  }
 }

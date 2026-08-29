@@ -4,6 +4,10 @@ import 'seller_orders_screen.dart';
 import 'settings_screen.dart'; // Reutilizamos esta pantalla
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../services/auth_service.dart';
+import '../models/vendedor.dart';
+import 'vendedor_detail_screen.dart';
+import 'seller_edit_profile_screen.dart';
 
 class SellerMainScreen extends StatefulWidget {
   const SellerMainScreen({super.key});
@@ -18,6 +22,7 @@ class _SellerMainScreenState extends State<SellerMainScreen> {
   final List<Widget> _screens = [
     const SellerProductsScreen(),
     const SellerOrdersScreen(),
+    _MiPerfilVendedorTab(),
     const SettingsScreen(), // Reutilizamos tu pantalla de configuración
   ];
 
@@ -57,6 +62,55 @@ class _SellerMainScreenState extends State<SellerMainScreen> {
           ),
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Ajustes'),
         ],
+      ),
+    );
+  }
+}
+
+class _MiPerfilVendedorTab extends StatefulWidget {
+  @override
+  State<_MiPerfilVendedorTab> createState() => _MiPerfilVendedorTabState();
+}
+
+class _MiPerfilVendedorTabState extends State<_MiPerfilVendedorTab> {
+  Vendedor? miPerfil;
+
+  @override
+  void initState() {
+    super.initState();
+    _cargar();
+  }
+
+  Future<void> _cargar() async {
+    final perfil = await AuthService().getCurrentUser();
+    setState(() => miPerfil = perfil);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (miPerfil == null)
+      return const Center(child: CircularProgressIndicator());
+    return Scaffold(
+      body: VendedorDetailScreen(
+        vendedor: miPerfil!,
+      ), // Reutilizamos tu hermosa pantalla
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          final actualizo = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  SellerEditProfileScreen(perfilActual: miPerfil!),
+            ),
+          );
+          if (actualizo == true) _cargar();
+        },
+        backgroundColor: Colors.amber.shade600,
+        icon: const Icon(Icons.edit, color: Colors.white),
+        label: const Text(
+          'Editar Perfil',
+          style: TextStyle(color: Colors.white),
+        ),
       ),
     );
   }

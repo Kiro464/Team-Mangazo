@@ -2,9 +2,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/producto_service.dart';
+import '../models/producto.dart';
 
 class AddProductScreen extends StatefulWidget {
-  const AddProductScreen({super.key});
+  final Producto? productoAEditar;
+  const AddProductScreen({super.key, this.productoAEditar});
 
   @override
   State<AddProductScreen> createState() => _AddProductScreenState();
@@ -91,10 +93,16 @@ class _AddProductScreenState extends State<AddProductScreen> {
     };
 
     // Enviamos a Django
-    bool exito = await _productoService.crearProducto(
-      datos,
-      _imagenSeleccionada,
-    );
+    bool exito;
+    if (widget.productoAEditar == null) {
+      exito = await _productoService.crearProducto(datos, _imagenSeleccionada);
+    } else {
+      exito = await _productoService.editarProducto(
+        widget.productoAEditar!.id,
+        datos,
+        _imagenSeleccionada,
+      );
+    }
 
     setState(() => _isSubmitting = false);
 
@@ -257,5 +265,22 @@ class _AddProductScreenState extends State<AddProductScreen> {
               ),
             ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.productoAEditar != null) {
+      _nombreCtrl.text = widget.productoAEditar!.nombre;
+      _descripcionCtrl.text = widget.productoAEditar!.descripcion;
+      _precioCtrl.text = widget.productoAEditar!.precioReferencial.toString();
+      // Buscamos la llave de la categoría basándonos en el nombre
+      _categoriaSeleccionada = _categorias.entries
+          .firstWhere(
+            (e) => e.key == widget.productoAEditar!.categoriaNombre,
+            orElse: () => _categorias.entries.first,
+          )
+          .value;
+    }
   }
 }
