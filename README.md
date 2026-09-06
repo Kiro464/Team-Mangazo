@@ -47,6 +47,22 @@ python manage.py migrate
 python manage.py runserver 0.0.0.0:8000
 
 
+### 1. Despliegue del Frontend (Flutter)
+# 1. Navegar a la carpeta del frontend
+cd frontend
+
+# 2. Descargar dependencias
+flutter pub get
+
+# 3. Configurar IP Local
+# Abre `lib/services/auth_service.dart` y `producto_service.dart`
+# Reemplaza '127.0.0.1' o '10.0.2.2' por la IP IPv4 de la máquina host.
+# Ejemplo: final String baseUrl = '[http://192.168.1.15:8000/api](http://192.168.1.15:8000/api)';
+
+# 4. Ejecutar en dispositivos físicos conectados
+flutter run -d all
+
+
 
 Integrantes:
 
