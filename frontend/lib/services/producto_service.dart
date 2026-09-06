@@ -147,7 +147,7 @@ class ProductoService {
     }
   }
 
-  Future<bool> toggleActivo(int id, bool estadoActual) async {
+  Future<bool> actualizarBooleano(int id, String campo, bool nuevoValor) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('access_token');
@@ -157,7 +157,9 @@ class ProductoService {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: jsonEncode({'activo': !estadoActual}), // Enviamos lo contrario
+        body: jsonEncode({
+          campo: nuevoValor,
+        }), // Mandamos 'activo' o 'es_oferta_flash'
       );
       return response.statusCode == 200 || response.statusCode == 201;
     } catch (e) {

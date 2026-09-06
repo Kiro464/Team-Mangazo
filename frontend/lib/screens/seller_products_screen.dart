@@ -85,15 +85,61 @@ class _SellerProductsScreenState extends State<SellerProductsScreen> {
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Switch(
-                                  value: p.activo,
-                                  activeColor: Colors.amber,
-                                  onChanged: (val) async {
-                                    bool exito = await _productoService
-                                        .toggleActivo(p.id, p.activo);
-                                    if (exito) _cargarMisProductos();
-                                  },
+                                // --- INTERRUPTOR 1: OFERTA FLASH (RAYO) ---
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.flash_on,
+                                      size: 16,
+                                      color: Colors.amber,
+                                    ),
+                                    Transform.scale(
+                                      scale: 0.7,
+                                      child: Switch(
+                                        value: p.esOfertaFlash,
+                                        activeColor: Colors.amber,
+                                        onChanged: (val) async {
+                                          await _productoService
+                                              .actualizarBooleano(
+                                                p.id,
+                                                'es_oferta_flash',
+                                                val,
+                                              );
+                                          _cargarMisProductos();
+                                        },
+                                      ),
+                                    ),
+                                  ],
                                 ),
+                                // --- INTERRUPTOR 2: ACTIVO EN CATÁLOGO (OJO) ---
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.visibility,
+                                      size: 16,
+                                      color: Colors.blue,
+                                    ),
+                                    Transform.scale(
+                                      scale: 0.7,
+                                      child: Switch(
+                                        value: p.activo,
+                                        activeColor: Colors.blue,
+                                        onChanged: (val) async {
+                                          await _productoService
+                                              .actualizarBooleano(
+                                                p.id,
+                                                'activo',
+                                                val,
+                                              );
+                                          _cargarMisProductos();
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                // --- BOTÓN DE EDITAR ---
                                 IconButton(
                                   icon: const Icon(
                                     Icons.edit,

@@ -49,6 +49,7 @@ class Producto(models.Model):
     imagen = models.ImageField(upload_to='productos/', blank=True, null=True)
     youtube_video_id = models.CharField(max_length=50, blank=True, null=True)
     activo = models.BooleanField(default=True)
+    es_oferta_flash = models.BooleanField(default=False)
 
     def __str__(self):
         return self.nombre

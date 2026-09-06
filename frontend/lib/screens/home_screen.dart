@@ -39,19 +39,21 @@ class _HomeScreenState extends State<HomeScreen> {
   void _filtrarProductos() {
     final query = _searchController.text.toLowerCase();
     setState(() {
-      // Filtramos el catálogo general
+      // 1. Filtrado para el CATÁLOGO GENERAL (Solo requiere estar activo)
       _productosFiltrados = _productos.where((p) {
-        return p.activo && // <-- SOLO PRODUCTOS ACTIVOS
+        return p.activo &&
             (p.nombre.toLowerCase().contains(query) ||
                 p.categoriaNombre.toLowerCase().contains(query) ||
                 p.vendedorNombre.toLowerCase().contains(query));
       }).toList();
 
-      // Filtramos también las ofertas flash
+      // 2. Filtrado para OFERTAS FLASH (Requiere activo + rayito de oferta)
       _ofertasFlashFiltradas = _ofertasFlash.where((p) {
-        return p.nombre.toLowerCase().contains(query) ||
-            p.categoriaNombre.toLowerCase().contains(query) ||
-            p.vendedorNombre.toLowerCase().contains(query);
+        return p.activo &&
+            p.esOfertaFlash && // <--- AQUÍ ESTÁ LA CONDICIÓN DOBLE
+            (p.nombre.toLowerCase().contains(query) ||
+                p.categoriaNombre.toLowerCase().contains(query) ||
+                p.vendedorNombre.toLowerCase().contains(query));
       }).toList();
     });
   }
@@ -67,7 +69,9 @@ class _HomeScreenState extends State<HomeScreen> {
       _productosFiltrados = resultados[0];
 
       _ofertasFlash = resultados[1];
-      _ofertasFlashFiltradas = resultados[1]; // <-- INICIALIZAMOS
+      _ofertasFlashFiltradas = _ofertasFlash
+          .where((p) => p.activo && p.esOfertaFlash)
+          .toList();
 
       _isLoading = false;
     });
