@@ -5,7 +5,7 @@ import '../providers/cart_provider.dart';
 import '../models/pedido.dart';
 
 class PedidoService {
-  final String baseUrl = 'http://10.0.2.2:8000/api';
+  final String baseUrl = 'http://192.168.1.25:8000/api';
 
   // Ahora devuelve un int (El ID del pedido) o null si falla
   Future<int?> enviarPedido(List<CartItem> items, int vendedorId) async {

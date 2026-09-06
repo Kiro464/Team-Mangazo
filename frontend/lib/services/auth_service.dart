@@ -6,7 +6,7 @@ import '../models/vendedor.dart';
 
 class AuthService {
   // Cambia esta URL si pruebas en un dispositivo físico (usa la IP de la PC)
-  final String baseUrl = 'http://10.0.2.2:8000/api';
+  final String baseUrl = 'http://192.168.1.25:8000/api';
 
   Future<bool> login(String username, String password) async {
     try {

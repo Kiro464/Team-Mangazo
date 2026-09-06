@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/producto.dart';
 
 class ProductoService {
-  final String baseUrl = 'http://10.0.2.2:8000/api';
+  final String baseUrl = 'http://192.168.1.25:8000/api';
 
   // Función interna para obtener los encabezados con el Token JWT
   Future<Map<String, String>> _getHeaders() async {
