@@ -79,8 +79,73 @@ class _SellerProductsScreenState extends State<SellerProductsScreen> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            subtitle: Text(
-                              'C\$ ${p.precioReferencial} • ${p.categoriaNombre}',
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'C\$ ${p.precioReferencial} - ${p.categoriaNombre}',
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: p.activo
+                                            ? Colors.green.shade100
+                                            : Colors.red.shade100,
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text(
+                                        p.activo ? 'Visible' : 'Oculto',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                          color: p.activo
+                                              ? Colors.green.shade800
+                                              : Colors.red.shade800,
+                                        ),
+                                      ),
+                                    ),
+                                    if (p.esOfertaFlash) ...[
+                                      const SizedBox(width: 6),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 6,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.amber.shade100,
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              Icons.flash_on,
+                                              size: 12,
+                                              color: Colors.amber.shade900,
+                                            ),
+                                            Text(
+                                              'Oferta Flash',
+                                              style: TextStyle(
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.amber.shade900,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ],
                             ),
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -142,9 +207,11 @@ class _SellerProductsScreenState extends State<SellerProductsScreen> {
                                 // --- BOTÓN DE EDITAR ---
                                 IconButton(
                                   icon: const Icon(
-                                    Icons.edit,
+                                    Icons.edit_note,
                                     color: Colors.blueGrey,
+                                    size: 28,
                                   ),
+                                  tooltip: 'Editar producto',
                                   onPressed: () {
                                     Navigator.push(
                                       context,

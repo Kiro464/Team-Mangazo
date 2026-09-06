@@ -24,6 +24,10 @@ class _AddProductScreenState extends State<AddProductScreen> {
     text: 'Todo el año',
   );
 
+  // Variables de estado para los interruptores
+  bool _activo = true;
+  bool _esOfertaFlash = false;
+
   // Asumimos los IDs de las categorías según el script semilla
   String _categoriaSeleccionada = '1';
   final Map<String, String> _categorias = {
@@ -36,6 +40,29 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
   File? _imagenSeleccionada;
   bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.productoAEditar != null) {
+      _nombreCtrl.text = widget.productoAEditar!.nombre;
+      _descripcionCtrl.text = widget.productoAEditar!.descripcion;
+      _precioCtrl.text = widget.productoAEditar!.precioReferencial.toString();
+      _temporadaCtrl.text = widget.productoAEditar!.mesesTemporada;
+
+      // Cargamos los estados existentes
+      _activo = widget.productoAEditar!.activo;
+      _esOfertaFlash = widget.productoAEditar!.esOfertaFlash;
+
+      // Buscamos la llave de la categoría basándonos en el nombre
+      _categoriaSeleccionada = _categorias.entries
+          .firstWhere(
+            (e) => e.key == widget.productoAEditar!.categoriaNombre,
+            orElse: () => _categorias.entries.first,
+          )
+          .value;
+    }
+  }
 
   // Función para abrir la cámara o galería
   Future<void> _seleccionarImagen(ImageSource source) async {
@@ -87,13 +114,15 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
     setState(() => _isSubmitting = true);
 
-    // Preparamos los textos
+    // Preparamos los textos y variables
     Map<String, String> datos = {
       'nombre': _nombreCtrl.text,
       'descripcion': _descripcionCtrl.text,
       'precio_referencial': _precioCtrl.text,
       'categoria': _categoriaSeleccionada,
       'meses_temporada': _temporadaCtrl.text,
+      'activo': _activo.toString(),
+      'es_oferta_flash': _esOfertaFlash.toString(),
     };
 
     // Enviamos a Django
@@ -301,6 +330,46 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   ),
                   const SizedBox(height: 32),
 
+                  // --- INTERRUPTORES DE CONFIGURACIÓN ---
+                  const Divider(),
+                  const Text(
+                    'Configuración de Publicación',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  const SizedBox(height: 8),
+
+                  SwitchListTile(
+                    title: const Text('Visible en catálogo general'),
+                    subtitle: const Text(
+                      'Permite que los compradores encuentren este producto',
+                    ),
+                    secondary: Icon(
+                      Icons.visibility,
+                      color: _activo ? Colors.blue : Colors.grey,
+                    ),
+                    value: _activo,
+                    activeColor: Colors.blue,
+                    contentPadding: EdgeInsets.zero,
+                    onChanged: (val) => setState(() => _activo = val),
+                  ),
+
+                  SwitchListTile(
+                    title: const Text('Oferta Flash'),
+                    subtitle: const Text(
+                      'Destacar en la sección de ofertas relámpago',
+                    ),
+                    secondary: Icon(
+                      Icons.flash_on,
+                      color: _esOfertaFlash ? Colors.amber : Colors.grey,
+                    ),
+                    value: _esOfertaFlash,
+                    activeColor: Colors.amber,
+                    contentPadding: EdgeInsets.zero,
+                    onChanged: (val) => setState(() => _esOfertaFlash = val),
+                  ),
+
+                  const SizedBox(height: 24),
+
                   // --- BOTÓN DE GUARDAR ---
                   ElevatedButton(
                     onPressed: _guardarProducto,
@@ -321,23 +390,5 @@ class _AddProductScreenState extends State<AddProductScreen> {
               ),
             ),
     );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.productoAEditar != null) {
-      _nombreCtrl.text = widget.productoAEditar!.nombre;
-      _descripcionCtrl.text = widget.productoAEditar!.descripcion;
-      _precioCtrl.text = widget.productoAEditar!.precioReferencial.toString();
-      _temporadaCtrl.text = widget.productoAEditar!.mesesTemporada;
-      // Buscamos la llave de la categoría basándonos en el nombre
-      _categoriaSeleccionada = _categorias.entries
-          .firstWhere(
-            (e) => e.key == widget.productoAEditar!.categoriaNombre,
-            orElse: () => _categorias.entries.first,
-          )
-          .value;
-    }
   }
 }
