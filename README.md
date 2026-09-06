@@ -60,3 +60,13 @@ flutter pub get
 
 # 4. Ejecutar en dispositivos físicos conectados
 flutter run -d all
+
+Integrantes:
+
+Alejandro Jimenez
+
+Leonardo Joaquin
+
+Fátima Herrera
+
+Yasser Castillo
