@@ -10,6 +10,8 @@ class Producto {
   final String? imagen; // Puede ser null si aún no subes foto
   final bool activo;
   final bool esOfertaFlash; // Nuevo campo para indicar si es una oferta flash
+  final String mesesTemporada;
+  final bool vendedorPremium;
 
   Producto({
     required this.id,
@@ -23,6 +25,8 @@ class Producto {
     this.imagen,
     required this.activo,
     required this.esOfertaFlash, // Inicializamos el nuevo campo
+    required this.mesesTemporada,
+    required this.vendedorPremium,
   });
 
   // Esta "fábrica" convierte el JSON de Django en un Objeto de Flutter
@@ -44,6 +48,8 @@ class Producto {
       activo: json['activo'] ?? true,
       esOfertaFlash:
           json['es_oferta_flash'] ?? false, // Inicializamos el nuevo campo
+      mesesTemporada: json['meses_temporada']?.toString() ?? 'Todo el año',
+      vendedorPremium: json['vendedor_premium'] ?? false,
     );
   }
 }

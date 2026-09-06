@@ -22,7 +22,20 @@ class _SellerOrdersScreenState extends State<SellerOrdersScreen> {
 
   Future<void> _cargarPedidos() async {
     setState(() => _isLoading = true);
-    _pedidos = await _pedidoService.getMisPedidos();
+    var lista = await _pedidoService.getMisPedidos();
+
+    // ORDENAR: Comercios primero, Premium segundo, Normales después.
+    lista.sort((a, b) {
+      if (a.compradorComercios && !b.compradorComercios) return -1;
+      if (!a.compradorComercios && b.compradorComercios) return 1;
+
+      if (a.compradorPremium && !b.compradorPremium) return -1;
+      if (!a.compradorPremium && b.compradorPremium) return 1;
+
+      return 0; // Si son iguales, no se mueven
+    });
+
+    _pedidos = lista;
     setState(() => _isLoading = false);
   }
 
@@ -71,11 +84,38 @@ class _SellerOrdersScreenState extends State<SellerOrdersScreen> {
                                   ? Colors.orange
                                   : (esExito ? Colors.green : Colors.red),
                             ),
-                            title: Text(
-                              'Pedido #${pedido.id} - ${pedido.compradorNombre}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
+                            title: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    'Pedido #${pedido.id} - ${pedido.compradorNombre}',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                // Ícono de Comercio (Azul)
+                                if (pedido.compradorComercios) ...[
+                                  const SizedBox(width: 4),
+                                  const Icon(
+                                    Icons.store,
+                                    color: Colors.blue,
+                                    size: 18,
+                                  ),
+                                ],
+                                // Ícono Premium (Estrella Ámbar, solo si no es comercio)
+                                if (pedido.compradorPremium &&
+                                    !pedido.compradorComercios) ...[
+                                  const SizedBox(width: 4),
+                                  const Icon(
+                                    Icons.star,
+                                    color: Colors.amber,
+                                    size: 18,
+                                  ),
+                                ],
+                              ],
                             ),
                             // Usamos la nueva variable 'esExito' aquí también:
                             subtitle: Text(

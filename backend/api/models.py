@@ -14,6 +14,7 @@ class Usuario(AbstractUser):
     rol = models.ForeignKey(Rol, on_delete=models.SET_NULL, null=True, blank=True)
     telefono_whatsapp = models.CharField(max_length=20, blank=True, null=True)
     es_premium = models.BooleanField(default=False)
+    es_comprador_comercios = models.BooleanField(default=False)
     # AbstractUser ya incluye por defecto: id, username, password, email, first_name, last_name, date_joined
 
     foto_perfil = models.ImageField(upload_to='perfiles/', blank=True, null=True)
@@ -50,6 +51,7 @@ class Producto(models.Model):
     youtube_video_id = models.CharField(max_length=50, blank=True, null=True)
     activo = models.BooleanField(default=True)
     es_oferta_flash = models.BooleanField(default=False)
+    meses_temporada = models.CharField(max_length=100, blank=True, null=True, default='Todo el año')
 
     def __str__(self):
         return self.nombre

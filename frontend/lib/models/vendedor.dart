@@ -36,6 +36,7 @@ class Vendedor {
   final double promedioCalificaciones;
   final List<Resena> resenas;
   final int rol;
+  final bool esCompradorComercios;
 
   Vendedor({
     required this.id,
@@ -52,6 +53,7 @@ class Vendedor {
     required this.promedioCalificaciones,
     required this.resenas,
     required this.rol,
+    required this.esCompradorComercios,
   });
 
   String get nombreCompleto =>
@@ -75,6 +77,7 @@ class Vendedor {
           double.tryParse(json['promedio_calificaciones'].toString()) ?? 0.0,
       resenas: listaResenas.map((i) => Resena.fromJson(i)).toList(),
       rol: int.tryParse(json['rol'].toString()) ?? 3,
+      esCompradorComercios: json['es_comprador_comercios'] ?? false,
     );
   }
 }

@@ -20,6 +20,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
   final TextEditingController _nombreCtrl = TextEditingController();
   final TextEditingController _descripcionCtrl = TextEditingController();
   final TextEditingController _precioCtrl = TextEditingController();
+  final TextEditingController _temporadaCtrl = TextEditingController(
+    text: 'Todo el año',
+  );
 
   // Asumimos los IDs de las categorías según el script semilla
   String _categoriaSeleccionada = '1';
@@ -90,6 +93,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
       'descripcion': _descripcionCtrl.text,
       'precio_referencial': _precioCtrl.text,
       'categoria': _categoriaSeleccionada,
+      'meses_temporada': _temporadaCtrl.text,
     };
 
     // Enviamos a Django
@@ -243,6 +247,58 @@ class _AddProductScreenState extends State<AddProductScreen> {
                       alignLabelWithHint: true,
                     ),
                   ),
+                  const SizedBox(height: 16), // <-- Espaciador
+                  // --- NUEVO CAMPO DE TEMPORADA AQUÍ ---
+                  DropdownButtonFormField<String>(
+                    value:
+                        [
+                          'Todo el año',
+                          'Enero',
+                          'Febrero',
+                          'Marzo',
+                          'Abril',
+                          'Mayo',
+                          'Junio',
+                          'Julio',
+                          'Agosto',
+                          'Septiembre',
+                          'Octubre',
+                          'Noviembre',
+                          'Diciembre',
+                        ].contains(_temporadaCtrl.text)
+                        ? _temporadaCtrl.text
+                        : 'Todo el año',
+                    decoration: const InputDecoration(
+                      labelText: 'Mes de Temporada',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.calendar_month),
+                    ),
+                    items:
+                        [
+                              'Todo el año',
+                              'Enero',
+                              'Febrero',
+                              'Marzo',
+                              'Abril',
+                              'Mayo',
+                              'Junio',
+                              'Julio',
+                              'Agosto',
+                              'Septiembre',
+                              'Octubre',
+                              'Noviembre',
+                              'Diciembre',
+                            ]
+                            .map(
+                              (mes) => DropdownMenuItem(
+                                value: mes,
+                                child: Text(mes),
+                              ),
+                            )
+                            .toList(),
+                    onChanged: (val) =>
+                        setState(() => _temporadaCtrl.text = val!),
+                  ),
                   const SizedBox(height: 32),
 
                   // --- BOTÓN DE GUARDAR ---
@@ -274,6 +330,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
       _nombreCtrl.text = widget.productoAEditar!.nombre;
       _descripcionCtrl.text = widget.productoAEditar!.descripcion;
       _precioCtrl.text = widget.productoAEditar!.precioReferencial.toString();
+      _temporadaCtrl.text = widget.productoAEditar!.mesesTemporada;
       // Buscamos la llave de la categoría basándonos en el nombre
       _categoriaSeleccionada = _categorias.entries
           .firstWhere(

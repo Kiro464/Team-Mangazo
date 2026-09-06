@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../models/producto.dart';
 import '../services/producto_service.dart';
 import '../providers/cart_provider.dart';
+import 'vendedor_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -65,10 +66,29 @@ class _HomeScreenState extends State<HomeScreen> {
     ]);
 
     setState(() {
-      _productos = resultados[0];
-      _productosFiltrados = resultados[0];
+      // 1. Extraemos la lista general
+      var todosLosProductos = resultados[0];
 
-      _ofertasFlash = resultados[1];
+      // 2. ORDENAR CATÁLOGO: Premium primero
+      todosLosProductos.sort((a, b) {
+        if (a.vendedorPremium && !b.vendedorPremium) return -1;
+        if (!a.vendedorPremium && b.vendedorPremium) return 1;
+        return 0;
+      });
+
+      // 3. Asignamos y filtramos los inactivos
+      _productos = todosLosProductos;
+      _productosFiltrados = _productos.where((p) => p.activo).toList();
+
+      // 4. Hacemos lo mismo para las Ofertas Flash (Opcional pero recomendado)
+      var todasLasOfertas = resultados[1];
+      todasLasOfertas.sort((a, b) {
+        if (a.vendedorPremium && !b.vendedorPremium) return -1;
+        if (!a.vendedorPremium && b.vendedorPremium) return 1;
+        return 0;
+      });
+
+      _ofertasFlash = todasLasOfertas;
       _ofertasFlashFiltradas = _ofertasFlash
           .where((p) => p.activo && p.esOfertaFlash)
           .toList();
@@ -234,29 +254,76 @@ class _HomeScreenState extends State<HomeScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
-                  // --- NUEVA SECCIÓN DEL VENDEDOR ---
+
+                  // --- NUEVA SECCIÓN: TEMPORADA ---
                   Row(
                     children: [
                       const Icon(
-                        Icons.storefront,
+                        Icons.calendar_month,
                         size: 14,
                         color: Colors.grey,
                       ),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          producto.vendedorNombre.isEmpty
-                              ? 'Vendedor'
-                              : producto.vendedorNombre,
-                          style: TextStyle(
+                          producto.mesesTemporada,
+                          style: const TextStyle(
                             fontSize: 12,
-                            color: Colors.grey[700],
+                            color: Colors.grey,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 4),
+
+                  // --- SECCIÓN DEL VENDEDOR (ACTUALIZADA: CLICKABLE Y PREMIUM) ---
+                  GestureDetector(
+                    onTap: () {
+                      // Aquí puedes agregar la navegación real al perfil en el futuro
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Abriendo perfil del productor...'),
+                        ),
+                      );
+                    },
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.storefront,
+                          size: 14,
+                          color: producto.vendedorPremium
+                              ? Colors.amber
+                              : Colors.grey,
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            producto.vendedorNombre.isEmpty
+                                ? 'Vendedor'
+                                : producto.vendedorNombre,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: producto.vendedorPremium
+                                  ? Colors.amber.shade900
+                                  : Colors.blue,
+                              decoration: TextDecoration
+                                  .underline, // Subrayado para indicar que es clickable
+                              fontWeight: producto.vendedorPremium
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        // Si es premium, le ponemos una estrellita dorada
+                        if (producto.vendedorPremium)
+                          const Icon(Icons.star, size: 14, color: Colors.amber),
+                      ],
+                    ),
                   ),
                   // ------------------------------------
                   const SizedBox(height: 4),

@@ -28,6 +28,8 @@ class Pedido {
   final String vendedorNombre;
   final String compradorNombre;
   final List<DetallePedido> detalles;
+  final bool compradorPremium;
+  final bool compradorComercios;
 
   Pedido({
     required this.id,
@@ -36,6 +38,8 @@ class Pedido {
     required this.vendedorNombre,
     required this.compradorNombre,
     required this.detalles,
+    required this.compradorPremium,
+    required this.compradorComercios,
   });
 
   factory Pedido.fromJson(Map<String, dynamic> json) {
@@ -55,6 +59,8 @@ class Pedido {
       compradorNombre:
           json['comprador_nombre']?.toString() ?? 'Comprador Desconocido',
       detalles: detallesList,
+      compradorPremium: json['comprador_premium'] == true,
+      compradorComercios: json['comprador_comercios'] == true,
     );
   }
 

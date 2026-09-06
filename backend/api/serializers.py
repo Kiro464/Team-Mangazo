@@ -18,7 +18,7 @@ class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
         fields = ['id', 'username', 'email', 'password', 'first_name', 'last_name', 
-                  'telefono_whatsapp', 'es_premium', 'rol', 
+                  'telefono_whatsapp', 'es_premium', 'rol', 'es_comprador_comercios',
                   'foto_perfil', 'historia_vendedor', 'link_redes', 'video_youtube',
                   'promedio_calificaciones', 'resenas']
 
@@ -69,6 +69,7 @@ class ProductoSerializer(serializers.ModelSerializer):
     vendedor_telefono = serializers.ReadOnlyField(source='vendedor.telefono_whatsapp')
 
     vendedor = serializers.PrimaryKeyRelatedField(read_only=True)
+    vendedor_premium = serializers.ReadOnlyField(source='vendedor.es_premium')
     
     class Meta:
         model = Producto
@@ -94,6 +95,8 @@ class PedidoWhatsAppSerializer(serializers.ModelSerializer):
     comprador_nombre = serializers.SerializerMethodField()
     # 1. Hacemos que el comprador sea de solo lectura (Django lo asignará)
     comprador = serializers.PrimaryKeyRelatedField(read_only=True)
+    comprador_premium = serializers.ReadOnlyField(source='comprador.es_premium')
+    comprador_comercios = serializers.ReadOnlyField(source='comprador.es_comprador_comercios')
 
     class Meta:
         model = PedidoWhatsApp
