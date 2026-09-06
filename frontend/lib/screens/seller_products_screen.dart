@@ -4,6 +4,7 @@ import '../models/vendedor.dart';
 import '../services/producto_service.dart';
 import '../services/auth_service.dart';
 import 'add_product_screen.dart';
+import 'settings_screen.dart';
 
 class SellerProductsScreen extends StatefulWidget {
   const SellerProductsScreen({super.key});
@@ -29,9 +30,7 @@ class _SellerProductsScreenState extends State<SellerProductsScreen> {
 
     if (miPerfil != null) {
       final todos = await _productoService.getProductos();
-      // Filtramos solo los productos donde el vendedorId coincida con mi ID
       _misProductos = todos.where((p) => p.vendedorId == miPerfil.id).toList();
-
       _misProductos.sort((a, b) => a.id.compareTo(b.id));
     }
     setState(() => _isLoading = false);
@@ -147,93 +146,30 @@ class _SellerProductsScreenState extends State<SellerProductsScreen> {
                                 ),
                               ],
                             ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                // --- INTERRUPTOR 1: OFERTA FLASH (RAYO) ---
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(
-                                      Icons.flash_on,
-                                      size: 16,
-                                      color: Colors.amber,
-                                    ),
-                                    Transform.scale(
-                                      scale: 0.7,
-                                      child: Switch(
-                                        value: p.esOfertaFlash,
-                                        activeColor: Colors.amber,
-                                        onChanged: (val) async {
-                                          await _productoService
-                                              .actualizarBooleano(
-                                                p.id,
-                                                'es_oferta_flash',
-                                                val,
-                                              );
-                                          _cargarMisProductos();
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                // --- INTERRUPTOR 2: ACTIVO EN CATÁLOGO (OJO) ---
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(
-                                      Icons.visibility,
-                                      size: 16,
-                                      color: Colors.blue,
-                                    ),
-                                    Transform.scale(
-                                      scale: 0.7,
-                                      child: Switch(
-                                        value: p.activo,
-                                        activeColor: Colors.blue,
-                                        onChanged: (val) async {
-                                          await _productoService
-                                              .actualizarBooleano(
-                                                p.id,
-                                                'activo',
-                                                val,
-                                              );
-                                          _cargarMisProductos();
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                // --- BOTÓN DE EDITAR ---
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.edit_note,
-                                    color: Colors.blueGrey,
-                                    size: 28,
+                            trailing: IconButton(
+                              icon: const Icon(
+                                Icons.edit_note,
+                                color: Colors.blueGrey,
+                                size: 32,
+                              ),
+                              tooltip: 'Editar producto',
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        AddProductScreen(productoAEditar: p),
                                   ),
-                                  tooltip: 'Editar producto',
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => AddProductScreen(
-                                          productoAEditar: p,
-                                        ),
-                                      ),
-                                    ).then((_) => _cargarMisProductos());
-                                  },
-                                ),
-                              ],
+                                ).then((_) => _cargarMisProductos());
+                              },
                             ),
                           ),
                         );
                       },
                     ),
             ),
-      // Botón flotante para agregar producto
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          // Al regresar de la pantalla, recargamos la lista automáticamente
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const AddProductScreen()),

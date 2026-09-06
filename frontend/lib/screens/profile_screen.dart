@@ -28,13 +28,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _cargarPedidos() async {
     setState(() => _isLoading = true);
-    // Cargamos tanto los pedidos como tus datos al mismo tiempo
     _miPerfil = await AuthService().getCurrentUser();
     _pedidos = await _pedidoService.getMisPedidos();
     setState(() => _isLoading = false);
   }
 
-  // --- CUADRO DE ENCUESTA (Migrado del Carrito) ---
   void _mostrarEncuesta(BuildContext context, int pedidoId) {
     int calificacion = 5;
     TextEditingController comentarioController = TextEditingController();
@@ -126,78 +124,76 @@ class _ProfileScreenState extends State<ProfileScreen> {
               onRefresh: _cargarPedidos,
               child: CustomScrollView(
                 slivers: [
-                  // --- CABECERA DE PERFIL ---
+                  SliverAppBar(
+                    title: const Text('Mi Perfil'),
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.primary.withOpacity(0.1),
+                    pinned: true,
+                    actions: [
+                      IconButton(
+                        icon: const Icon(
+                          Icons.settings,
+                          color: Colors.blueGrey,
+                        ),
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SettingsScreen(),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                   SliverToBoxAdapter(
                     child: Container(
-                      padding: const EdgeInsets.all(24),
+                      padding: const EdgeInsets.only(
+                        bottom: 24,
+                        left: 24,
+                        right: 24,
+                      ),
                       color: Theme.of(
                         context,
                       ).colorScheme.primary.withOpacity(0.1),
-                      child: Stack(
+                      child: Column(
                         children: [
-                          // Botón de Configuración arriba a la derecha
-                          Align(
-                            alignment: Alignment.topRight,
-                            child: IconButton(
-                              icon: const Icon(
-                                Icons.settings,
-                                color: Colors.blueGrey,
-                              ),
-                              onPressed: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const SettingsScreen(),
-                                ),
-                              ),
+                          const CircleAvatar(
+                            radius: 40,
+                            backgroundColor: Colors.white,
+                            child: Icon(
+                              Icons.person,
+                              size: 50,
+                              color: Colors.grey,
                             ),
                           ),
-                          // Tu columna original
-                          Column(
-                            children: [
-                              const CircleAvatar(
-                                radius: 40,
-                                backgroundColor: Colors.white,
-                                child: Icon(
-                                  Icons.person,
-                                  size: 50,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                _miPerfil?.nombreCompleto ?? 'Mi Perfil',
-                                style: const TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                '@${_miPerfil?.username ?? "usuario"}',
-                                style: const TextStyle(color: Colors.grey),
-                              ),
-                              const SizedBox(height: 16),
-                              OutlinedButton.icon(
-                                onPressed: () => Provider.of<AuthProvider>(
-                                  context,
-                                  listen: false,
-                                ).logout(),
-                                icon: const Icon(
-                                  Icons.logout,
-                                  color: Colors.red,
-                                ),
-                                label: const Text(
-                                  'Cerrar Sesión',
-                                  style: TextStyle(color: Colors.red),
-                                ),
-                              ),
-                            ],
+                          const SizedBox(height: 16),
+                          Text(
+                            _miPerfil?.nombreCompleto ?? 'Mi Perfil',
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            '@${_miPerfil?.username ?? "usuario"}',
+                            style: const TextStyle(color: Colors.grey),
+                          ),
+                          const SizedBox(height: 16),
+                          OutlinedButton.icon(
+                            onPressed: () => Provider.of<AuthProvider>(
+                              context,
+                              listen: false,
+                            ).logout(),
+                            icon: const Icon(Icons.logout, color: Colors.red),
+                            label: const Text(
+                              'Cerrar Sesión',
+                              style: TextStyle(color: Colors.red),
+                            ),
                           ),
                         ],
                       ),
                     ),
                   ),
-
-                  // --- TÍTULO HISTORIAL ---
                   const SliverToBoxAdapter(
                     child: Padding(
                       padding: EdgeInsets.all(16.0),
@@ -210,125 +206,130 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                   ),
-
-                  // --- LISTA DE PEDIDOS ---
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate((context, index) {
-                      final pedido = _pedidos[index];
-                      final bool esPendiente = pedido.estado == 'Pendiente';
-
-                      return Card(
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
+                  if (_pedidos.isEmpty)
+                    const SliverToBoxAdapter(
+                      child: Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(32.0),
+                          child: Text(
+                            'Aún no tienes pedidos en tu historial.',
+                            style: TextStyle(color: Colors.grey),
+                          ),
                         ),
-                        child: ExpansionTile(
-                          leading: Icon(
-                            esPendiente
-                                ? Icons.local_shipping
-                                : Icons.check_circle,
-                            color: esPendiente ? Colors.orange : Colors.green,
+                      ),
+                    )
+                  else
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        final pedido = _pedidos[index];
+                        final bool esPendiente = pedido.estado == 'Pendiente';
+
+                        return Card(
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
                           ),
-                          title: Text(
-                            'Pedido - ${pedido.fecha}',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          child: ExpansionTile(
+                            leading: Icon(
+                              esPendiente
+                                  ? Icons.local_shipping
+                                  : Icons.check_circle,
+                              color: esPendiente ? Colors.orange : Colors.green,
+                            ),
+                            title: Text(
+                              'Pedido - ${pedido.fecha}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Vendedor: ${pedido.vendedorNombre}',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  esPendiente
+                                      ? 'Estado: Esperando entrega'
+                                      : 'Estado: Completado',
+                                  style: TextStyle(
+                                    color: esPendiente
+                                        ? Colors.orange[800]
+                                        : Colors.green,
+                                  ),
+                                ),
+                              ],
+                            ),
                             children: [
-                              Text(
-                                'Vendedor: ${pedido.vendedorNombre}',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
+                              const Divider(),
+                              ...pedido.detalles.map(
+                                (detalle) => ListTile(
+                                  dense: true,
+                                  title: Text(
+                                    '${detalle.cantidad}x ${detalle.productoNombre}',
+                                  ),
+                                  trailing: Text(
+                                    'C\$ ${detalle.precio * detalle.cantidad}',
+                                  ),
                                 ),
                               ),
-                              Text(
-                                esPendiente
-                                    ? 'Estado: Esperando entrega'
-                                    : 'Estado: Completado',
-                                style: TextStyle(
-                                  color: esPendiente
-                                      ? Colors.orange[800]
-                                      : Colors.green,
+                              Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Total: C\$ ${pedido.total}',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    if (esPendiente)
+                                      ElevatedButton(
+                                        onPressed: () async {
+                                          bool exito = await _pedidoService
+                                              .confirmarEntrega(pedido.id);
+                                          if (exito) {
+                                            if (context.mounted)
+                                              _mostrarEncuesta(
+                                                context,
+                                                pedido.id,
+                                              );
+                                            _cargarPedidos();
+                                          } else {
+                                            if (context.mounted) {
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                const SnackBar(
+                                                  content: Text(
+                                                    'Error al confirmar.',
+                                                  ),
+                                                  backgroundColor: Colors.red,
+                                                ),
+                                              );
+                                            }
+                                          }
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.green,
+                                          foregroundColor: Colors.white,
+                                        ),
+                                        child: const Text('Confirmar Entrega'),
+                                      ),
+                                  ],
                                 ),
                               ),
                             ],
                           ),
-                          children: [
-                            const Divider(),
-                            // Lista interna de productos del pedido
-                            ...pedido.detalles.map(
-                              (detalle) => ListTile(
-                                dense: true,
-                                title: Text(
-                                  '${detalle.cantidad}x ${detalle.productoNombre}',
-                                ),
-                                trailing: Text(
-                                  'C\$ ${detalle.precio * detalle.cantidad}',
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Total: C\$ ${pedido.total}',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  // Botón condicional: Solo aparece si está pendiente
-                                  if (esPendiente)
-                                    ElevatedButton(
-                                      onPressed: () async {
-                                        // 1. Hacemos la petición a Django
-                                        bool exito = await _pedidoService
-                                            .confirmarEntrega(pedido.id);
-
-                                        if (exito) {
-                                          // 2. Lanzamos la encuesta INMEDIATAMENTE antes de recargar la pantalla
-                                          if (context.mounted) {
-                                            _mostrarEncuesta(
-                                              context,
-                                              pedido.id,
-                                            );
-                                          }
-                                          // 3. Recargamos los pedidos en el fondo para que el texto cambie a verde
-                                          _cargarPedidos();
-                                        } else {
-                                          // 4. Si Django rechaza la petición, mostramos el error
-                                          if (context.mounted) {
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              const SnackBar(
-                                                content: Text(
-                                                  'Error al confirmar. Revisa la consola.',
-                                                ),
-                                                backgroundColor: Colors.red,
-                                              ),
-                                            );
-                                          }
-                                        }
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.green,
-                                        foregroundColor: Colors.white,
-                                      ),
-                                      child: const Text('Confirmar Entrega'),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }, childCount: _pedidos.length),
-                  ),
+                        );
+                      }, childCount: _pedidos.length),
+                    ),
                 ],
               ),
             ),

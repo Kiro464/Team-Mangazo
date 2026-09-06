@@ -13,7 +13,6 @@ class DetallePedido {
     return DetallePedido(
       productoNombre:
           json['producto_nombre']?.toString() ?? 'Producto Desconocido',
-      // Convertimos a String primero, y luego forzamos a int/double. Si falla, ponemos un 0.
       cantidad: int.tryParse(json['cantidad'].toString()) ?? 1,
       precio:
           double.tryParse(json['precio_unitario_aplicado'].toString()) ?? 0.0,
@@ -52,13 +51,13 @@ class Pedido {
       id: int.tryParse(json['id'].toString()) ?? 0,
       estado: json['estado']?.toString() ?? 'Pendiente',
       fecha:
-          json['fecha_generacion']?.toString().substring(0, 10) ??
-          'Sin fecha', // Extraemos solo YYYY-MM-DD
+          json['fecha_generacion']?.toString().substring(0, 10) ?? 'Sin fecha',
       vendedorNombre:
           json['vendedor_nombre']?.toString() ?? 'Vendedor Desconocido',
       compradorNombre:
           json['comprador_nombre']?.toString() ?? 'Comprador Desconocido',
       detalles: detallesList,
+      // ¡EL BUG ESTABA AQUÍ! Ahora evalúa correctamente a true
       compradorPremium: json['comprador_premium'] == true,
       compradorComercios: json['comprador_comercios'] == true,
     );

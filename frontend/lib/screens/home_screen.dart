@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../models/producto.dart';
 import '../services/producto_service.dart';
 import '../providers/cart_provider.dart';
+import '../services/vendedor_service.dart'; // <-- Importamos el servicio de vendedores
 import 'vendedor_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -20,13 +21,31 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Producto> _productosFiltrados = [];
 
   List<Producto> _ofertasFlash = [];
-  List<Producto> _ofertasFlashFiltradas = []; // <-- NUEVA LISTA
+  List<Producto> _ofertasFlashFiltradas = [];
 
   bool _isLoading = true;
+  String _mesActual = '';
 
   @override
   void initState() {
     super.initState();
+    // Detectamos el mes actual automáticamente
+    const meses = [
+      'Enero',
+      'Febrero',
+      'Marzo',
+      'Abril',
+      'Mayo',
+      'Junio',
+      'Julio',
+      'Agosto',
+      'Septiembre',
+      'Octubre',
+      'Noviembre',
+      'Diciembre',
+    ];
+    _mesActual = meses[DateTime.now().month - 1];
+
     _cargarDatos();
     _searchController.addListener(_filtrarProductos);
   }
@@ -40,7 +59,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void _filtrarProductos() {
     final query = _searchController.text.toLowerCase();
     setState(() {
-      // 1. Filtrado para el CATÁLOGO GENERAL (Solo requiere estar activo)
       _productosFiltrados = _productos.where((p) {
         return p.activo &&
             (p.nombre.toLowerCase().contains(query) ||
@@ -48,10 +66,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 p.vendedorNombre.toLowerCase().contains(query));
       }).toList();
 
-      // 2. Filtrado para OFERTAS FLASH (Requiere activo + rayito de oferta)
       _ofertasFlashFiltradas = _ofertasFlash.where((p) {
         return p.activo &&
-            p.esOfertaFlash && // <--- AQUÍ ESTÁ LA CONDICIÓN DOBLE
+            p.esOfertaFlash &&
             (p.nombre.toLowerCase().contains(query) ||
                 p.categoriaNombre.toLowerCase().contains(query) ||
                 p.vendedorNombre.toLowerCase().contains(query));
@@ -66,21 +83,16 @@ class _HomeScreenState extends State<HomeScreen> {
     ]);
 
     setState(() {
-      // 1. Extraemos la lista general
       var todosLosProductos = resultados[0];
-
-      // 2. ORDENAR CATÁLOGO: Premium primero
       todosLosProductos.sort((a, b) {
         if (a.vendedorPremium && !b.vendedorPremium) return -1;
         if (!a.vendedorPremium && b.vendedorPremium) return 1;
         return 0;
       });
 
-      // 3. Asignamos y filtramos los inactivos
       _productos = todosLosProductos;
       _productosFiltrados = _productos.where((p) => p.activo).toList();
 
-      // 4. Hacemos lo mismo para las Ofertas Flash (Opcional pero recomendado)
       var todasLasOfertas = resultados[1];
       todasLasOfertas.sort((a, b) {
         if (a.vendedorPremium && !b.vendedorPremium) return -1;
@@ -99,12 +111,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    if (_isLoading) return const Center(child: CircularProgressIndicator());
 
     return RefreshIndicator(
-      onRefresh: _cargarDatos, // Permite recargar al deslizar hacia abajo
+      onRefresh: _cargarDatos,
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -130,12 +140,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-
-            // --- SECCIÓN: OFERTAS FLASH ---
             const Padding(
               padding: EdgeInsets.all(16.0),
               child: Text(
-                '⚡ Ofertas Flash', // <-- QUITAMOS "(Premium)"
+                '⚡ Ofertas Flash',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
@@ -149,21 +157,17 @@ class _HomeScreenState extends State<HomeScreen> {
               )
             else
               SizedBox(
-                height: 262,
+                height: 330,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
-                  itemCount: _ofertasFlashFiltradas
-                      .length, // <-- USAMOS LA LISTA FILTRADA
+                  itemCount: _ofertasFlashFiltradas.length,
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  itemBuilder: (context, index) {
-                    final producto =
-                        _ofertasFlashFiltradas[index]; // <-- USAMOS LA LISTA FILTRADA
-                    return _buildProductoCard(producto, isFlash: true);
-                  },
+                  itemBuilder: (context, index) => _buildProductoCard(
+                    _ofertasFlashFiltradas[index],
+                    isFlash: true,
+                  ),
                 ),
               ),
-
-            // --- SECCIÓN: CATÁLOGO GENERAL ---
             const Padding(
               padding: EdgeInsets.all(16.0),
               child: Text(
@@ -171,7 +175,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
-
             if (_productosFiltrados.isEmpty)
               const Padding(
                 padding: EdgeInsets.all(32.0),
@@ -184,16 +187,14 @@ class _HomeScreenState extends State<HomeScreen> {
               )
             else
               ListView.builder(
-                physics:
-                    const NeverScrollableScrollPhysics(), // Desactiva su propio scroll para usar el de la página
-                shrinkWrap: true, // Se adapta al tamaño del contenido
-                itemCount: _productosFiltrados.length, // <-- CAMBIO AQUÍ
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: _productosFiltrados.length,
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                itemBuilder: (context, index) {
-                  final producto =
-                      _productosFiltrados[index]; // <-- CAMBIO AQUÍ
-                  return _buildProductoCard(producto, isFlash: false);
-                },
+                itemBuilder: (context, index) => _buildProductoCard(
+                  _productosFiltrados[index],
+                  isFlash: false,
+                ),
               ),
           ],
         ),
@@ -201,7 +202,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Widget reutilizable para dibujar la tarjeta (card) del producto
   Widget _buildProductoCard(Producto producto, {required bool isFlash}) {
     return Container(
       width: isFlash ? 160 : double.infinity,
@@ -212,23 +212,49 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              height: 100,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(12),
+            Stack(
+              children: [
+                Container(
+                  height: 100,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(12),
+                    ),
+                  ),
+                  child: producto.imagen != null
+                      ? ClipRRect(
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(12),
+                          ),
+                          child: Image.network(
+                            producto.imagen!,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : const Icon(Icons.image, size: 50, color: Colors.grey),
                 ),
-              ),
-              child: producto.imagen != null
-                  ? ClipRRect(
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(12),
+                if (producto.mesesTemporada.contains(_mesActual))
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      color: Colors.green.withOpacity(0.9),
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Text(
+                        '🌟 Temporada de $_mesActual',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                      child: Image.network(producto.imagen!, fit: BoxFit.cover),
-                    )
-                  : const Icon(Icons.image, size: 50, color: Colors.grey),
+                    ),
+                  ),
+              ],
             ),
             Padding(
               padding: const EdgeInsets.all(12.0),
@@ -254,8 +280,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
-
-                  // --- NUEVA SECCIÓN: TEMPORADA ---
                   Row(
                     children: [
                       const Icon(
@@ -278,54 +302,89 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                   const SizedBox(height: 4),
-
-                  // --- SECCIÓN DEL VENDEDOR (ACTUALIZADA: CLICKABLE Y PREMIUM) ---
-                  GestureDetector(
-                    onTap: () {
-                      // Aquí puedes agregar la navegación real al perfil en el futuro
+                  InkWell(
+                    // LÓGICA DE NAVEGACIÓN ASÍNCRONA CORREGIDA
+                    onTap: () async {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Abriendo perfil del productor...'),
+                          content: Text('Cargando perfil...'),
+                          duration: Duration(milliseconds: 500),
                         ),
                       );
-                    },
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.storefront,
-                          size: 14,
-                          color: producto.vendedorPremium
-                              ? Colors.amber
-                              : Colors.grey,
-                        ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            producto.vendedorNombre.isEmpty
-                                ? 'Vendedor'
-                                : producto.vendedorNombre,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: producto.vendedorPremium
-                                  ? Colors.amber.shade900
-                                  : Colors.blue,
-                              decoration: TextDecoration
-                                  .underline, // Subrayado para indicar que es clickable
-                              fontWeight: producto.vendedorPremium
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
+
+                      try {
+                        final vendedorService = VendedorService();
+                        final todosLosVendedores = await vendedorService
+                            .getVendedores();
+
+                        final vendedorCompleto = todosLosVendedores.firstWhere(
+                          (v) => v.id == producto.vendedorId,
+                        );
+
+                        if (context.mounted) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => VendedorDetailScreen(
+                                vendedor: vendedorCompleto,
+                              ),
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Error al cargar el perfil del productor',
+                              ),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4.0),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.storefront,
+                            size: 14,
+                            color: producto.vendedorPremium
+                                ? Colors.amber
+                                : Colors.grey,
                           ),
-                        ),
-                        // Si es premium, le ponemos una estrellita dorada
-                        if (producto.vendedorPremium)
-                          const Icon(Icons.star, size: 14, color: Colors.amber),
-                      ],
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              producto.vendedorNombre.isEmpty
+                                  ? 'Vendedor'
+                                  : producto.vendedorNombre,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: producto.vendedorPremium
+                                    ? Colors.amber.shade900
+                                    : Colors.blue,
+                                decoration: TextDecoration.underline,
+                                fontWeight: producto.vendedorPremium
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (producto.vendedorPremium)
+                            const Icon(
+                              Icons.star,
+                              size: 14,
+                              color: Colors.amber,
+                            ),
+                        ],
+                      ),
                     ),
                   ),
-                  // ------------------------------------
                   const SizedBox(height: 4),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

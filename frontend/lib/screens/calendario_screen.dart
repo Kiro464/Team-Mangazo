@@ -22,15 +22,23 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
     _cargarTemporada();
   }
 
+  // Filtramos localmente para asegurar que sí detecte los de este mes exacto
   Future<void> _cargarTemporada() async {
-    final resultados = await _productoService.getCalendarioTemporada();
-    setState(() {
-      _productosTemporada = resultados;
-      _isLoading = false;
-    });
+    try {
+      final todosLosProductos = await _productoService.getProductos();
+      final mesActual = getMesActual();
+
+      setState(() {
+        _productosTemporada = todosLosProductos
+            .where((p) => p.activo && p.mesesTemporada.contains(mesActual))
+            .toList();
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+    }
   }
 
-  // Lista de meses para mostrar el nombre del mes actual de forma amigable
   final List<String> meses = [
     'Enero',
     'Febrero',
@@ -105,6 +113,8 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
                               ),
                               subtitle: Text(
                                 'Vendedor: ${producto.vendedorNombre} • C\$ ${producto.precioReferencial}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                               trailing: IconButton(
                                 icon: const Icon(

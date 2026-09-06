@@ -8,6 +8,7 @@ import '../services/auth_service.dart';
 import '../models/vendedor.dart';
 import 'vendedor_detail_screen.dart';
 import 'seller_edit_profile_screen.dart';
+import 'settings_screen.dart';
 
 class SellerMainScreen extends StatefulWidget {
   const SellerMainScreen({super.key});
@@ -30,12 +31,21 @@ class _SellerMainScreenState extends State<SellerMainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Mangazo - Productores',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        title: const Text('Panel de Productor - Icidro'),
         backgroundColor: Colors.amber.shade100,
         actions: [
+          // 1. Botón de Configuración / Premium (Engranaje)
+          IconButton(
+            icon: const Icon(Icons.settings, color: Colors.blueGrey),
+            tooltip: 'Configuración y Membresía',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
+            },
+          ),
+          // 2. Botón de Cerrar Sesión (Rojo) que ya tenías
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.red),
             tooltip: 'Cerrar Sesión',

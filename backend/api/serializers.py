@@ -100,7 +100,7 @@ class PedidoWhatsAppSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PedidoWhatsApp
-        fields = ['id', 'comprador', 'comprador_nombre', 'vendedor', 'vendedor_nombre', 'fecha_generacion', 'estado', 'detalles', 'detalles_creacion']
+        fields = ['id', 'comprador', 'comprador_nombre', 'comprador_premium', 'comprador_comercios', 'vendedor', 'vendedor_nombre', 'fecha_generacion', 'estado', 'detalles', 'detalles_creacion']
 
     def get_vendedor_nombre(self, obj):
         nombre = obj.vendedor.get_full_name()
