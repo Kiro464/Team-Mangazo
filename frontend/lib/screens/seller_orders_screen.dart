@@ -49,6 +49,11 @@ class _SellerOrdersScreenState extends State<SellerOrdersScreen> {
                       itemBuilder: (context, index) {
                         final pedido = _pedidos[index];
                         final bool esPendiente = pedido.estado == 'Pendiente';
+                        // NUEVO: Agrupamos los estados exitosos
+                        final bool esExito =
+                            pedido.estado == 'Aceptado' ||
+                            pedido.estado == 'Completado' ||
+                            pedido.estado == 'Entregado';
 
                         return Card(
                           margin: const EdgeInsets.symmetric(
@@ -59,23 +64,26 @@ class _SellerOrdersScreenState extends State<SellerOrdersScreen> {
                             leading: Icon(
                               esPendiente
                                   ? Icons.notification_important
-                                  : Icons.check_circle,
-                              color: esPendiente ? Colors.orange : Colors.green,
+                                  : (esExito
+                                        ? Icons.check_circle
+                                        : Icons.cancel),
+                              color: esPendiente
+                                  ? Colors.orange
+                                  : (esExito ? Colors.green : Colors.red),
                             ),
                             title: Text(
-                              'Pedido - ${pedido.fecha}',
+                              'Pedido #${pedido.id} - ${pedido.compradorNombre}',
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
+                            // Usamos la nueva variable 'esExito' aquí también:
                             subtitle: Text(
-                              esPendiente
-                                  ? 'Estado: Pendiente de entrega'
-                                  : 'Estado: Entregado',
+                              'Estado: ${pedido.estado}',
                               style: TextStyle(
                                 color: esPendiente
                                     ? Colors.orange[800]
-                                    : Colors.green,
+                                    : (esExito ? Colors.green : Colors.red),
                               ),
                             ),
                             children: [
@@ -102,6 +110,48 @@ class _SellerOrdersScreenState extends State<SellerOrdersScreen> {
                                   ),
                                 ),
                               ),
+                              if (esPendiente)
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.red,
+                                      ),
+                                      onPressed: () async {
+                                        await _pedidoService
+                                            .actualizarEstadoPedido(
+                                              pedido.id,
+                                              'Cancelado',
+                                            );
+                                        _cargarPedidos();
+                                      },
+                                      child: const Text(
+                                        'Cancelar',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    ),
+                                    ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.green,
+                                      ),
+                                      onPressed: () async {
+                                        await _pedidoService
+                                            .actualizarEstadoPedido(
+                                              pedido.id,
+                                              'Aceptado',
+                                            );
+                                        _cargarPedidos();
+                                      },
+                                      child: const Text(
+                                        'Aceptar',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              const SizedBox(height: 10),
                             ],
                           ),
                         );

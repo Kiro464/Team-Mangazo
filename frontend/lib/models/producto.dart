@@ -8,6 +8,7 @@ class Producto {
   final int vendedorId;
   final String? vendedorTelefono;
   final String? imagen; // Puede ser null si aún no subes foto
+  final bool activo;
 
   Producto({
     required this.id,
@@ -19,6 +20,7 @@ class Producto {
     required this.vendedorId,
     this.vendedorTelefono,
     this.imagen,
+    required this.activo,
   });
 
   // Esta "fábrica" convierte el JSON de Django en un Objeto de Flutter
@@ -37,6 +39,7 @@ class Producto {
       vendedorId: int.tryParse(json['vendedor_id'].toString()) ?? 0,
       vendedorTelefono: json['vendedor_telefono']?.toString(),
       imagen: json['imagen'],
+      activo: json['activo'] ?? true,
     );
   }
 }

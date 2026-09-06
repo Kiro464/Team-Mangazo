@@ -146,4 +146,22 @@ class ProductoService {
       return false;
     }
   }
+
+  Future<bool> toggleActivo(int id, bool estadoActual) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('access_token');
+      final response = await http.patch(
+        Uri.parse('$baseUrl/productos/$id/'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({'activo': !estadoActual}), // Enviamos lo contrario
+      );
+      return response.statusCode == 200 || response.statusCode == 201;
+    } catch (e) {
+      return false;
+    }
+  }
 }

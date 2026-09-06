@@ -26,6 +26,7 @@ class Pedido {
   final String estado;
   final String fecha;
   final String vendedorNombre;
+  final String compradorNombre;
   final List<DetallePedido> detalles;
 
   Pedido({
@@ -33,6 +34,7 @@ class Pedido {
     required this.estado,
     required this.fecha,
     required this.vendedorNombre,
+    required this.compradorNombre,
     required this.detalles,
   });
 
@@ -50,6 +52,8 @@ class Pedido {
           'Sin fecha', // Extraemos solo YYYY-MM-DD
       vendedorNombre:
           json['vendedor_nombre']?.toString() ?? 'Vendedor Desconocido',
+      compradorNombre:
+          json['comprador_nombre']?.toString() ?? 'Comprador Desconocido',
       detalles: detallesList,
     );
   }

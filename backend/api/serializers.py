@@ -91,16 +91,21 @@ class PedidoWhatsAppSerializer(serializers.ModelSerializer):
     detalles = DetallePedidoSerializer(many=True, read_only=True)
     detalles_creacion = serializers.ListField(child=serializers.DictField(), write_only=True)
     vendedor_nombre = serializers.SerializerMethodField()
+    comprador_nombre = serializers.SerializerMethodField()
     # 1. Hacemos que el comprador sea de solo lectura (Django lo asignará)
     comprador = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = PedidoWhatsApp
-        fields = ['id', 'comprador', 'vendedor', 'vendedor_nombre', 'fecha_generacion', 'estado', 'detalles', 'detalles_creacion']
+        fields = ['id', 'comprador', 'comprador_nombre', 'vendedor', 'vendedor_nombre', 'fecha_generacion', 'estado', 'detalles', 'detalles_creacion']
 
     def get_vendedor_nombre(self, obj):
         nombre = obj.vendedor.get_full_name()
         return nombre if nombre.strip() else obj.vendedor.username
+
+    def get_comprador_nombre(self, obj):
+        nombre = obj.comprador.get_full_name()
+        return nombre if nombre.strip() else obj.comprador.username
 
     def create(self, validated_data):
         detalles_data = validated_data.pop('detalles_creacion')

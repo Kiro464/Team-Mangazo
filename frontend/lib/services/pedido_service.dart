@@ -143,4 +143,22 @@ class PedidoService {
       return false;
     }
   }
+
+  Future<bool> actualizarEstadoPedido(int pedidoId, String nuevoEstado) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('access_token');
+      final response = await http.patch(
+        Uri.parse('$baseUrl/pedidos/$pedidoId/'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({'estado': nuevoEstado}),
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
 }

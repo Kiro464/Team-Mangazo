@@ -41,9 +41,10 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       // Filtramos el catálogo general
       _productosFiltrados = _productos.where((p) {
-        return p.nombre.toLowerCase().contains(query) ||
-            p.categoriaNombre.toLowerCase().contains(query) ||
-            p.vendedorNombre.toLowerCase().contains(query);
+        return p.activo && // <-- SOLO PRODUCTOS ACTIVOS
+            (p.nombre.toLowerCase().contains(query) ||
+                p.categoriaNombre.toLowerCase().contains(query) ||
+                p.vendedorNombre.toLowerCase().contains(query));
       }).toList();
 
       // Filtramos también las ofertas flash

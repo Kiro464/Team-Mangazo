@@ -31,6 +31,8 @@ class _SellerProductsScreenState extends State<SellerProductsScreen> {
       final todos = await _productoService.getProductos();
       // Filtramos solo los productos donde el vendedorId coincida con mi ID
       _misProductos = todos.where((p) => p.vendedorId == miPerfil.id).toList();
+
+      _misProductos.sort((a, b) => a.id.compareTo(b.id));
     }
     setState(() => _isLoading = false);
   }
@@ -80,20 +82,35 @@ class _SellerProductsScreenState extends State<SellerProductsScreen> {
                             subtitle: Text(
                               'C\$ ${p.precioReferencial} • ${p.categoriaNombre}',
                             ),
-                            trailing: IconButton(
-                              icon: const Icon(
-                                Icons.edit,
-                                color: Colors.blueGrey,
-                              ),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        AddProductScreen(productoAEditar: p),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Switch(
+                                  value: p.activo,
+                                  activeColor: Colors.amber,
+                                  onChanged: (val) async {
+                                    bool exito = await _productoService
+                                        .toggleActivo(p.id, p.activo);
+                                    if (exito) _cargarMisProductos();
+                                  },
+                                ),
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.edit,
+                                    color: Colors.blueGrey,
                                   ),
-                                ).then((_) => _cargarMisProductos());
-                              },
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => AddProductScreen(
+                                          productoAEditar: p,
+                                        ),
+                                      ),
+                                    ).then((_) => _cargarMisProductos());
+                                  },
+                                ),
+                              ],
                             ),
                           ),
                         );
